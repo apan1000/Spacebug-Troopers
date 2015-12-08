@@ -33,6 +33,7 @@ var cursors;
 var stars;
 var score = 0;
 var scoreText;
+var isFacingLeft = true;
 
 recognition.onresult = function(event) {
   // if (event.results.length > 0) {
@@ -102,6 +103,8 @@ function create() {
 
     // The player and its settings
     player = game.add.sprite(32, game.world.height - 150, 'dude');
+    // Set anchor to middle so that character can be flipped without movement.
+    player.anchor.setTo(.5, .5);
 
     //  We need to enable physics on the player
     game.physics.arcade.enable(player);
@@ -113,7 +116,7 @@ function create() {
 
     //  Our two animations, walking left and right.
     player.animations.add('left', [0, 1, 2, 3], 10, true);
-    player.animations.add('right', [5, 6, 7, 8], 10, true);
+    // player.animations.add('right', [5, 6, 7, 8], 10, true);
 
     //  Finally some stars to collect
     stars = game.add.group();
@@ -184,7 +187,10 @@ function update() {
     {
         //  Move to the left
         player.body.velocity.x = -150;
-
+        if(!isFacingLeft){
+          isFacingLeft = true;
+          player.scale.x *= -1; // Flip character.
+        }
         player.animations.play('left');
     }
     else if (cursors.right.isDown
@@ -194,8 +200,11 @@ function update() {
     {
         //  Move to the right
         player.body.velocity.x = 150;
-
-        player.animations.play('right');
+        if(isFacingLeft){
+          isFacingLeft = false;
+          player.scale.x *= -1; // Flip character.
+        }
+        player.animations.play('left');
     }
     else
     {
