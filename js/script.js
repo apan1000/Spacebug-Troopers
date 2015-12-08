@@ -1,9 +1,8 @@
 var game = new Phaser.Game(800, 600, Phaser.AUTO, '', { preload: preload, create: create, update: update });
 
 function preload() {
-
-    game.load.image('sky', 'assets/sky.png');
-    game.load.image('ground', 'assets/platform.png');
+    game.load.image('sky', 'assets/desert.png');
+    game.load.image('ground', 'assets/floor.png');
     game.load.image('star', 'assets/star.png');
     game.load.spritesheet('dude', 'assets/dude.png', 32, 48);
 
@@ -50,7 +49,7 @@ recognition.onresult = function(event) {
         } else {
             speechInput += event.results[i][0].transcript.toLowerCase();
         }
-        
+
     }
     console.log(speechInput);
     // console.log(final_transcript);
@@ -62,7 +61,7 @@ recognition.onresult = function(event) {
     //     su.text = speechInput;
     //     speechSynthesis.speak(su);
     // }
-    
+
 }
 
 function create() {
@@ -80,19 +79,25 @@ function create() {
     platforms.enableBody = true;
 
     // Here we create the ground.
-    var ground = platforms.create(0, game.world.height - 64, 'ground');
+    var ground = platforms.create(-game.world.width/2, game.world.height - 64, 'ground');
 
-    //  Scale it to fit the width of the game (the original sprite is 400x32 in size)
-    ground.scale.setTo(2, 2);
+    //  Scale it to fit the width of the game (the original sprite is 100x100 in size)
+    ground.scale.setTo(1, 1);
 
     //  This stops it from falling away when you jump on it
     ground.body.immovable = true;
 
     //  Now let's create two ledges
     var ledge = platforms.create(400, 400, 'ground');
+    ledge.scale.setTo(.5, .5);
     ledge.body.immovable = true;
 
-    ledge = platforms.create(-150, 250, 'ground');
+    ledge = platforms.create(50, 250, 'ground');
+    ledge.scale.setTo(.2, .5);
+    ledge.body.immovable = true;
+
+    ledge = platforms.create(200, 100, 'ground');
+    ledge.scale.setTo(.3, .5);
     ledge.body.immovable = true;
 
     // The player and its settings
@@ -199,7 +204,7 @@ function update() {
 
         player.frame = 4;
     }
-    
+
     //  Allow the player to jump if they are touching the ground.
     if (player.body.touching.down
         && (cursors.up.isDown
@@ -216,7 +221,7 @@ function update() {
 }
 
 function collectStar (player, star) {
-    
+
     // Removes the star from the screen
     star.kill();
 
