@@ -1,0 +1,13 @@
+{
+  "name": "voxing",
+  "private": true,
+  "version": "0.0.0",
+  "description": "A voice controlled strategy game",
+  "devDependencies": {
+    "live-server": "^0.9.0"
+  },
+  "scripts": {
+    "prestart": "npm install",
+    "start": "live-server"
+  }
+}

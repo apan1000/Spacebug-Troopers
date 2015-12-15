@@ -1,4 +1,5 @@
-var game = new Phaser.Game(800, 600, Phaser.AUTO, '', { preload: preload, create: create, update: update });
+var game = new Phaser.Game(1000, 600, Phaser.AUTO, '', { preload: preload, create: create, update: update });
+game.ScaleManager
 
 function preload() {
     game.load.image('sky', 'assets/desert.png');
@@ -8,14 +9,14 @@ function preload() {
 
 }
 
-var language = "en";
+var language = 'en';
 
 var recognition = new webkitSpeechRecognition();
 recognition.continuous = true;
 recognition.lang = language;
 recognition.interimResults = true;
-var speechInput = "";
-var final_transcript = "";
+var speechInput = '';
+var final_transcript = '';
 
 var stepping = true;
 
@@ -23,7 +24,7 @@ var su = new SpeechSynthesisUtterance();
 su.lang = language;
 su.rate = 6;
 su.pitch = 0.5;
-su.text = "Hello World";
+su.text = 'Hello World';
 speechSynthesis.speak(su);
 
 var player;
@@ -37,7 +38,7 @@ var isFacingLeft = true;
 
 recognition.onresult = function(event) {
   // if (event.results.length > 0) {
-    speechInput = "";
+    speechInput = '';
     // console.log(event);
     // for (var i = event.resultIndex; i < event.results.length; ++i) {
     for (var i = event.resultIndex; i < event.results.length; ++i) {
@@ -67,9 +68,6 @@ recognition.onresult = function(event) {
 
 function create() {
 
-    //  We're going to be using physics, so enable the Arcade Physics system
-    game.physics.startSystem(Phaser.Physics.ARCADE);
-
     //  A simple background for our game
     game.add.sprite(0, 0, 'sky');
 
@@ -80,7 +78,7 @@ function create() {
     platforms.enableBody = true;
 
     // Here we create the ground.
-    var ground = platforms.create(-game.world.width/2, game.world.height - 64, 'ground');
+    var ground = platforms.create(-game.world.width/4, game.world.height - 64, 'ground');
 
     //  Scale it to fit the width of the game (the original sprite is 100x100 in size)
     ground.scale.setTo(1, 1);
@@ -90,7 +88,7 @@ function create() {
 
     //  Now let's create two ledges
     var ledge = platforms.create(400, 400, 'ground');
-    ledge.scale.setTo(.5, .5);
+    ledge.scale.setTo(.35, .5);
     ledge.body.immovable = true;
 
     ledge = platforms.create(50, 250, 'ground');
@@ -106,14 +104,6 @@ function create() {
     // Set anchor to middle so that character can be flipped without movement.
     player.anchor.setTo(.5, .5);
 
-    //  We need to enable physics on the player
-    game.physics.arcade.enable(player);
-
-    //  Player physics properties. Give the little guy a slight bounce.
-    player.body.bounce.y = 0.2;
-    player.body.gravity.y = 300;
-    player.body.collideWorldBounds = true;
-
     //  Our two animations, walking left and right.
     player.animations.add('left', [0, 1, 2, 3], 10, true);
     // player.animations.add('right', [5, 6, 7, 8], 10, true);
@@ -121,20 +111,11 @@ function create() {
     //  Finally some stars to collect
     stars = game.add.group();
 
-    //  We will enable physics for any star that is created in this group
-    stars.enableBody = true;
-
     //  Here we'll create 12 of them evenly spaced apart
     for (var i = 0; i < 12; i++)
     {
         //  Create a star inside of the 'stars' group
         var star = stars.create(i * 70, 0, 'star');
-
-        //  Let gravity do its thing
-        star.body.gravity.y = 300;
-
-        //  This just gives each star a slightly random bounce value
-        star.body.bounce.y = 0.7 + Math.random() * 0.2;
     }
 
     //  The score
@@ -170,70 +151,60 @@ function create() {
 
 function update() {
 
-    //  Collide the player and the stars with the platforms
-    game.physics.arcade.collide(player, platforms);
-    game.physics.arcade.collide(stars, platforms);
-
-    //  Checks to see if the player overlaps with any of the stars, if he does call the collectStar function
-    game.physics.arcade.overlap(player, stars, collectStar, null, this);
-
-    //  Reset the players velocity (movement)
-    player.body.velocity.x = 0;
-
     if (cursors.left.isDown
-        || (speechInput.indexOf("left") > -1
-            )
+        || speechInput.indexOf('left') > -1
+        && !cursors.right.isDown
         )
     {
         //  Move to the left
-        player.body.velocity.x = -150;
+        player.x  -= 4;
         if(!isFacingLeft){
           isFacingLeft = true;
           player.scale.x *= -1; // Flip character.
         }
         player.animations.play('left');
-    }
-    else if (cursors.right.isDown
-        || (speechInput.indexOf("right") > -1
-            )
-        )
-    {
+    } else if (cursors.right.isDown
+        || speechInput.indexOf('right') > -1
+        && !cursors.left.isDown
+        ) {
         //  Move to the right
-        player.body.velocity.x = 150;
-        if(isFacingLeft){
+        player.x  += 4;
+        if (isFacingLeft) {
           isFacingLeft = false;
           player.scale.x *= -1; // Flip character.
         }
         player.animations.play('left');
-    }
-    else
-    {
+    } else {
         //  Stand still
         player.animations.stop();
-
         player.frame = 4;
     }
 
-    //  Allow the player to jump if they are touching the ground.
-    if (player.body.touching.down
-        && (cursors.up.isDown
-            || speechInput.indexOf("jum") > -1
-            || speechInput.indexOf("yum") > -1
-            || speechInput.indexOf("up") > -1
-            )
-        )
-    {
-        speechInput = "";
-        player.body.velocity.y = -350;
+    if (cursors.up.isDown
+        || speechInput.indexOf('up') > -1
+        ) {
+        //  Move up
+        player.y  -= 4;
+        // speechInput = '';
+    }
+
+    if (cursors.down.isDown
+        || speechInput.indexOf('down') > -1) {
+        //  Move down
+        player.y  += 4;
+        // speechInput = '';
     }
 
 }
 
 function collectStar (player, star) {
-
     // Removes the star from the screen
     star.kill();
-
+    if (star.group) {
+       star.group.remove(star);
+    } else if (star.parent) {
+       star.parent.removeChild(star);
+    }
     //  Add and update the score
     score += 10;
     scoreText.text = 'Score: ' + score;
