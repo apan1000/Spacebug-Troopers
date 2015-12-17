@@ -2,9 +2,6 @@ var game = new Phaser.Game(700, 700, Phaser.AUTO, '', { preload: preload, create
 game.ScaleManager
 
 function preload() {
-    //game.load.image('sky', 'assets/desert.png');
-    //game.load.image('ground', 'assets/floor.png');
-
     //Cessmap background. Each square is 100px.
     game.load.image('chessmap', 'assets/chessmap.png');
     game.load.image('star', 'assets/star.png');
@@ -38,7 +35,6 @@ var animationRunning = false;
 var stars;
 var score = 0;
 var scoreText;
-var isFacingLeft = true;
 
 recognition.onresult = function(event) {
   // if (event.results.length > 0) {
@@ -90,11 +86,19 @@ function create() {
     //  Finally some stars to collect
     stars = game.add.group();
 
-    //  Here we'll create 12 of them evenly spaced apart
-    for (var i = 0; i < 12; i++)
+    //  Here we'll create some stars and place them at random squares across the board
+    oddNumbers = [1,3,5,7,9,11,13];
+    for (var i = 0; i < 5; i++)
     {
+        randOddX = oddNumbers[Math.floor(Math.random()*6)];
+        randOddY = oddNumbers[Math.floor(Math.random()*6)];
+        randPlaceX = Math.floor((Math.random() * randOddX) + 1) * 50;
+        randPlaceY = Math.floor((Math.random() * randOddY) + 1) * 50;
+        console.log(randPlaceX);
+        console.log(randPlaceY);
         //  Create a star inside of the 'stars' group
-        var star = stars.create(i * 70, 0, 'star');
+        var star = stars.create(randPlaceX, randPlaceY, 'star');
+        i = i+1;
     }
 
     //  The score
@@ -172,7 +176,7 @@ function update() {
 }
 
 function walk (destinationX, destinationY) {
-    tween = this.game.add.tween(this.player).to({x:this.player.x + destinationX, y:this.player.y + destinationY}, 800, Phaser.Easing.Linear.None, true);
+    tween = this.game.add.tween(this.player).to({x:this.player.x + destinationX, y:this.player.y + destinationY}, 800, null, true);
 }
 
 function stopWalking (item) {
