@@ -33,6 +33,7 @@ speechSynthesis.speak(su);
 var player;
 var platforms;
 var cursors;
+var animationRunning = false;
 
 var stars;
 var score = 0;
@@ -74,42 +75,17 @@ function create() {
     //  A simple background for our game
     game.add.sprite(0, 0, 'chessmap');
 
-    //  The platforms group contains the ground and the 2 ledges we can jump on
-    //platforms = game.add.group();
-
-    //  We will enable physics for any object that is created in this group
-    //platforms.enableBody = true;
-
-    // Here we create the ground.
-    //var ground = platforms.create(-game.world.width/4, game.world.height - 64, 'ground');
-
-    //  Scale it to fit the width of the game (the original sprite is 100x100 in size)
-    //ground.scale.setTo(1, 1);
-
-    //  This stops it from falling away when you jump on it
-    //ground.body.immovable = true;
-
-    //  Now let's create two ledges
-    // var ledge = platforms.create(400, 400, 'ground');
-    // ledge.scale.setTo(.35, .5);
-    // ledge.body.immovable = true;
-
-    // ledge = platforms.create(50, 250, 'ground');
-    // ledge.scale.setTo(.2, .5);
-    // ledge.body.immovable = true;
-
-    // ledge = platforms.create(200, 100, 'ground');
-    // ledge.scale.setTo(.3, .5);
-    // ledge.body.immovable = true;
-
     // The player and its settings
     player = game.add.sprite(350, 350, 'dude');
     // Set anchor to middle so that character can be flipped without movement.
     player.anchor.setTo(.5, .5);
 
-    //  Our two animations, walking left and right.
-    player.animations.add('left', [0, 1, 2, 3], 10, true);
-    // player.animations.add('right', [5, 6, 7, 8], 10, true);
+    // Walking animation (turned left)
+    player.animations.add('walk', [0, 1, 2, 3], 10, true);
+    animationRunning = false;
+    
+    //player starts by standing still facing camera
+    player.frame = 4;
 
     //  Finally some stars to collect
     stars = game.add.group();
@@ -156,48 +132,53 @@ function update() {
 
     if (cursors.left.isDown
         || speechInput.indexOf('left') > -1
-        && !cursors.right.isDown
+        && !cursors.right.isDown && animationRunning === false
         )
     {
-        //  Move to the left
-        player.x  -= 4;
-        if(!isFacingLeft){
-          isFacingLeft = true;
-          player.scale.x *= -1; // Flip character.
-        }
-        player.animations.play('left');
+        //tween left
+        walk(-100,0);
+        player.scale.setTo(1,1);
+        animationRunning = true;
+        tween.onComplete.addOnce(stopWalking, this);
+        player.animations.play('walk',20,true);
+
     } else if (cursors.right.isDown
         || speechInput.indexOf('right') > -1
-        && !cursors.left.isDown
+        && !cursors.left.isDown && animationRunning === false
         ) {
-        //  Move to the right
-        player.x  += 4;
-        if (isFacingLeft) {
-          isFacingLeft = false;
-          player.scale.x *= -1; // Flip character.
-        }
-        player.animations.play('left');
-    } else {
-        //  Stand still
-        player.animations.stop();
-        player.frame = 4;
-    }
+        //tween right
+        walk(100,0);
+        player.scale.setTo(-1,1);
+        animationRunning = true;
+        player.animations.play('walk',20,true);
+        tween.onComplete.addOnce(stopWalking, this);  
+    } 
 
     if (cursors.up.isDown
         || speechInput.indexOf('up') > -1
         ) {
         //  Move up
-        player.y  -= 4;
+        walk(0,-100);
         // speechInput = '';
     }
 
     if (cursors.down.isDown
         || speechInput.indexOf('down') > -1) {
         //  Move down
-        player.y  += 4;
+        walk(0,100);
         // speechInput = '';
     }
 
+}
+
+function walk (destinationX, destinationY) {
+    tween = this.game.add.tween(this.player).to({x:this.player.x + destinationX, y:this.player.y + destinationY}, 800, Phaser.Easing.Linear.None, true);
+}
+
+function stopWalking (item) {
+    player.animations.stop('walk',true);
+    animationRunning = false;
+    player.frame = 4;
 }
 
 function collectStar (player, star) {
