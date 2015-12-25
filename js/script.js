@@ -6,6 +6,7 @@ function preload() {
     game.load.image('chessmap', 'assets/chessmap.png');
     game.load.image('star', 'assets/star.png');
     game.load.spritesheet('dude', 'assets/dude.png', 32, 48);
+    game.load.spritesheet('baddie', 'assets/baddie.png', 32, 48);
 
 }
 
@@ -28,6 +29,7 @@ su.text = 'Hello World';
 speechSynthesis.speak(su);
 
 var player;
+var baddie;
 var platforms;
 var cursors;
 var animationRunning = false;
@@ -53,8 +55,7 @@ recognition.onresult = function(event) {
         }
 
     }
-    console.log(speechInput);
-    // console.log(final_transcript);
+    console.log("Input: ", speechInput);
 
 
     // if (event.results.length > 0) {
@@ -71,20 +72,12 @@ function create() {
     //  A simple background for our game
     game.add.sprite(0, 0, 'chessmap');
 
-    // The player and its settings
-    player = game.add.sprite(350, 350, 'dude');
-    // Set anchor to middle so that character can be flipped without movement.
-    player.anchor.setTo(.5, .5);
-
-    // Walking animation (turned left)
-    player.animations.add('walk', [0, 1, 2, 3], 10, true);
-    animationRunning = false;
-    
-    //player starts by standing still facing camera
-    player.frame = 4;
+    createPlayer();
+    createBaddie();
 
     //  Finally some stars to collect
     stars = game.add.group();
+    stars.enableBody = true;
 
     //  Here we'll create some stars and place them at random squares across the board
     oddNumbers = [1,3,5,7,9,11,13];
@@ -134,8 +127,8 @@ function create() {
 
 function update() {
 
-    if (cursors.left.isDown
-        || speechInput.indexOf('left') > -1
+    if (speechInput.indexOf('left') > -1 && animationRunning === false
+        || cursors.left.isDown
         && !cursors.right.isDown && animationRunning === false
         )
     {
@@ -146,8 +139,8 @@ function update() {
         tween.onComplete.addOnce(stopWalking, this);
         player.animations.play('walk',20,true);
 
-    } else if (cursors.right.isDown
-        || speechInput.indexOf('right') > -1
+    } else if (speechInput.indexOf('right') > -1 && animationRunning === false
+        || cursors.right.isDown
         && !cursors.left.isDown && animationRunning === false
         ) {
         //tween right
@@ -175,6 +168,34 @@ function update() {
 
 }
 
+function createPlayer() {
+    // The player and its settings
+    player = game.add.sprite(350, 350, 'dude');
+    // Set anchor to middle so that character can be flipped without movement.
+    player.anchor.setTo(.5, .5);
+
+    // Walking animation (turned left)
+    player.animations.add('walk', [0, 1, 2, 3], 10, true);
+    animationRunning = false;
+    
+    //player starts by standing still facing camera
+    player.frame = 4;
+}
+
+function createBaddie() {
+    // The player and its settings
+    baddie = game.add.sprite(350, 50, 'baddie');
+    // Set anchor to middle so that character can be flipped without movement.
+    baddie.anchor.setTo(.5, .5);
+
+    // Walking animation (turned left)
+    //baddie.animations.add('walk', [0, 1, 2, 3], 10, true);
+    //animationRunning = false;
+    
+    //player starts by standing still facing camera
+    baddie.frame = 2;
+}
+
 function walk (destinationX, destinationY) {
     tween = this.game.add.tween(this.player).to({x:this.player.x + destinationX, y:this.player.y + destinationY}, 800, null, true);
 }
@@ -187,6 +208,7 @@ function stopWalking (item) {
 
 function collectStar (player, star) {
     // Removes the star from the screen
+    console.log("Gotcha!");
     star.kill();
     if (star.group) {
        star.group.remove(star);
