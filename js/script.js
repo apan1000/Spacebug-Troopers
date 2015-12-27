@@ -134,7 +134,7 @@ function update() {
     {
         //tween left
         walk(-100,0);
-        player.scale.setTo(1,1);
+        player.scale.setTo(-1,1);
         animationRunning = true;
         tween.onComplete.addOnce(stopWalking, this);
         player.animations.play('walk',20,true);
@@ -145,11 +145,11 @@ function update() {
         ) {
         //tween right
         walk(100,0);
-        player.scale.setTo(-1,1);
+        player.scale.setTo(1,1);
         animationRunning = true;
         player.animations.play('walk',20,true);
-        tween.onComplete.addOnce(stopWalking, this);  
-    } 
+        tween.onComplete.addOnce(stopWalking, this);
+    }
 
     if (cursors.up.isDown
         || speechInput.indexOf('up') > -1
@@ -174,10 +174,10 @@ function createPlayer() {
     // Set anchor to middle so that character can be flipped without movement.
     player.anchor.setTo(.5, .5);
 
-    // Walking animation (turned left)
-    player.animations.add('walk', [0, 1, 2, 3], 10, true);
+    // Walking animation (turned right)
+    player.animations.add('walk', [1, 2, 3, 4], 10, true);
     animationRunning = false;
-    
+
     //player starts by standing still facing camera
     player.frame = 4;
 }
@@ -191,13 +191,18 @@ function createBaddie() {
     // Walking animation (turned left)
     //baddie.animations.add('walk', [0, 1, 2, 3], 10, true);
     //animationRunning = false;
-    
+
     //player starts by standing still facing camera
     baddie.frame = 2;
 }
 
 function walk (destinationX, destinationY) {
-    tween = this.game.add.tween(this.player).to({x:this.player.x + destinationX, y:this.player.y + destinationY}, 800, null, true);
+  //Calculate new position
+  var newX = x:this.player.x + destinationX;
+  var newY = y:this.player.y + destinationY;
+
+  //Create a transition to the new location
+  tween = this.game.add.tween(this.player).to({newX, newY}, 800, null, true);
 }
 
 function stopWalking (item) {
