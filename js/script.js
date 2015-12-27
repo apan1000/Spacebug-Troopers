@@ -140,38 +140,44 @@ function update() {
     {
         //tween left
         walk(-100,0);
-        player.scale.setTo(-1,1);
+        player.scale.setTo(-1,1); //Mirror character
         animationRunning = true;
         tween.onComplete.addOnce(stopWalking, this);
-        player.animations.play('walk',20,true);
+        player.animations.play('walk_right',20,true);
 
-    } else if (speechInput.indexOf('right') > -1 && animationRunning === false
+    } else if (
+        speechInput.indexOf('right') > -1
+        && animationRunning === false
         || cursors.right.isDown
         && !cursors.left.isDown && animationRunning === false
         ) {
         //tween right
         walk(100,0);
-        player.scale.setTo(1,1);
+        player.scale.setTo(1,1); //Unmirror character
         animationRunning = true;
-        player.animations.play('walk',20,true);
+        player.animations.play('walk_right',20,true);
+        tween.onComplete.addOnce(stopWalking, this);
+    }else if (speechInput.indexOf('down') > -1 && animationRunning === false
+        || cursors.down.isDown
+        && !cursors.left.isDown && animationRunning === false
+        ) {
+        //tween down
+        walk(0,100);
+        player.scale.setTo(1,1); //Unmirror character
+        animationRunning = true;
+        player.animations.play('walk_down',10,true);
+        tween.onComplete.addOnce(stopWalking, this);
+    }else if (speechInput.indexOf('up') > -1 && animationRunning === false
+        || cursors.up.isDown
+        && !cursors.left.isDown && animationRunning === false
+        ) {
+        //tween up
+        walk(0,-100);
+        player.scale.setTo(1,1); //Unmirror character
+        animationRunning = true;
+        player.animations.play('walk_up',10,true);
         tween.onComplete.addOnce(stopWalking, this);
     }
-
-    if (cursors.up.isDown
-        || speechInput.indexOf('up') > -1
-        ) {
-        //  Move up
-        walk(0,-100);
-        // speechInput = '';
-    }
-
-    if (cursors.down.isDown
-        || speechInput.indexOf('down') > -1) {
-        //  Move down
-        walk(0,100);
-        // speechInput = '';
-    }
-
 }
 
 function createPlayer() {
@@ -186,8 +192,12 @@ function createPlayer() {
     // An animation of the character standing idle
     player.animations.add('idle', row(0), 10, true);
     // Walking animation (turned right)
-    player.animations.add('walk', row(1), 10, true);
+    player.animations.add('walk_right', row(1), 10, true);
+    player.animations.add('walk_down', row(2), 10, true);
+    player.animations.add('walk_up', row(3), 10, true);
     animationRunning = false;
+
+
 
     //player starts by standing still facing camera
     player.frame = 4;
