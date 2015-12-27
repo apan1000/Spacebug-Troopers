@@ -38,6 +38,12 @@ var stars;
 var score = 0;
 var scoreText;
 
+// Get frames for a row from a spritesheet.
+function row(number){
+  var pos = number*4;
+  return [pos, 1+pos, 2+pos, 3+pos];
+}
+
 recognition.onresult = function(event) {
   // if (event.results.length > 0) {
     speechInput = '';
@@ -174,8 +180,13 @@ function createPlayer() {
     // Set anchor to middle so that character can be flipped without movement.
     player.anchor.setTo(.5, .5);
 
+    // Define animation
+    // FORMAT: {what}.animations.add({action}, {frames}, {framerate}, {loop?})
+
+    // An animation of the character standing idle
+    player.animations.add('idle', row(0), 10, true);
     // Walking animation (turned right)
-    player.animations.add('walk', [1, 2, 3, 4], 10, true);
+    player.animations.add('walk', row(1), 10, true);
     animationRunning = false;
 
     //player starts by standing still facing camera
@@ -206,7 +217,8 @@ function walk (destinationX, destinationY) {
 }
 
 function stopWalking (item) {
-    player.animations.stop('walk',true);
+    // player.animations.stop('walk',true);
+    player.animations.play('idle');
     animationRunning = false;
     player.frame = 4;
 }
