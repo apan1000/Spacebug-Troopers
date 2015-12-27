@@ -198,11 +198,11 @@ function createBaddie() {
 
 function walk (destinationX, destinationY) {
   //Calculate new position
-  var newX = x:this.player.x + destinationX;
-  var newY = y:this.player.y + destinationY;
+  var newX = this.player.x + destinationX;
+  var newY = this.player.y + destinationY;
 
   //Create a transition to the new location
-  tween = this.game.add.tween(this.player).to({newX, newY}, 800, null, true);
+  tween = this.game.add.tween(this.player).to({x:newX, y:newY}, 800, null, true);
 }
 
 function stopWalking (item) {
