@@ -10,22 +10,21 @@ function preload() {
 
 }
 
-var language = 'en';
+var language = 'en_US';
 
 var recognition = new webkitSpeechRecognition();
 recognition.continuous = true;
 recognition.lang = language;
 recognition.interimResults = true;
+recognition.onend = function() {recognition.start();}
 var speechInput = '';
 var final_transcript = '';
 
-var stepping = true;
-
 var su = new SpeechSynthesisUtterance();
 su.lang = language;
-su.rate = 6;
-su.pitch = 0.5;
-su.text = 'Hello World';
+su.rate = 2;
+su.pitch = 1.5;
+su.text = 'Hello Dude';
 speechSynthesis.speak(su);
 
 var player;
@@ -50,18 +49,14 @@ recognition.onresult = function(event) {
     // console.log(event);
     // for (var i = event.resultIndex; i < event.results.length; ++i) {
     for (var i = event.resultIndex; i < event.results.length; ++i) {
-        if(stepping) {
-            if (event.results[i].isFinal) {
-                final_transcript += event.results[i][0].transcript;
-            } else {
-                speechInput += event.results[i][0].transcript.toLowerCase();
-            }
+        if (event.results[i].isFinal) {
+            final_transcript += event.results[i][0].transcript;
         } else {
             speechInput += event.results[i][0].transcript.toLowerCase();
         }
 
     }
-    console.log("Input: ", speechInput);
+    // console.log("Input: ", speechInput);
 
 
     // if (event.results.length > 0) {
@@ -106,77 +101,84 @@ function create() {
     //  Our controls.
     cursors = game.input.keyboard.createCursorKeys();
 
-    // Button
-    var graphics = game.add.graphics(698, -250);
-    // set a fill and line style
-    graphics.beginFill(0xff6cff);
-    graphics.lineStyle(2, 0x77ffcc, 1);
-    // draw a rectangle
-    graphics.drawRect(0, 250, 100, 25);
-    graphics.endFill();
-    buttonText = game.add.text(704, 2, 'step. walk', { fontSize: '16px', fill: '#000' });
-    // input
-    graphics.inputEnabled = true;
-    graphics.input.useHandCursor = true;
-    graphics.events.onInputDown.add(function () {
-        stepping = !stepping;
-        if(stepping) {
-            buttonText.setText('step. walk');
-        } else {
-            buttonText.setText('cont. walk');
-        }
-    }, this);
+    // // Button
+    // var graphics = game.add.graphics(698, -250);
+    // // set a fill and line style
+    // graphics.beginFill(0xff6cff);
+    // graphics.lineStyle(2, 0x77ffcc, 1);
+    // // draw a rectangle
+    // graphics.drawRect(0, 250, 100, 25);
+    // graphics.endFill();
+    // buttonText = game.add.text(704, 2, 'step. walk', { fontSize: '16px', fill: '#000' });
+    // // input
+    // graphics.inputEnabled = true;
+    // graphics.input.useHandCursor = true;
+    // graphics.events.onInputDown.add(function () {
+    //     if(SOMETHING) {
+    //         buttonText.setText('SOMETHING');
+    //     } else {
+    //         buttonText.setText('SOMETHING ELSE');
+    //     }
+    // }, this);
 
     // Start speech recognition
     recognition.start();
 }
 
 function update() {
+    if(speechInput != '') {
+        game.debug.text(speechInput, game.world.height/2-20, game.world.width/2, "#00c000");
+    }
 
-    if (speechInput.indexOf('left') > -1 && animationRunning === false
-        || cursors.left.isDown
-        && !cursors.right.isDown && animationRunning === false
-        )
-    {
-        //tween left
-        walk(-100,0);
-        player.scale.setTo(-1,1); //Mirror character
-        animationRunning = true;
-        tween.onComplete.addOnce(stopWalking, this);
-        player.animations.play('walk_right',20,true);
+    if(animationRunning === false) {
+        if (speechInput.indexOf('left') > -1
+            || cursors.left.isDown
+            && !cursors.right.isDown) {
+            //tween left
+            walk(player, -100, 0, 'walk_right', 20);
+            player.scale.setTo(-1,1); //Mirror character
+            
+            su.text = 'Okay, going left.';
+            speechSynthesis.speak(su);
 
-    } else if (
-        speechInput.indexOf('right') > -1
-        && animationRunning === false
-        || cursors.right.isDown
-        && !cursors.left.isDown && animationRunning === false
-        ) {
-        //tween right
-        walk(100,0);
-        player.scale.setTo(1,1); //Unmirror character
-        animationRunning = true;
-        player.animations.play('walk_right',20,true);
-        tween.onComplete.addOnce(stopWalking, this);
-    }else if (speechInput.indexOf('down') > -1 && animationRunning === false
-        || cursors.down.isDown
-        && !cursors.left.isDown && animationRunning === false
-        ) {
-        //tween down
-        walk(0,100);
-        player.scale.setTo(1,1); //Unmirror character
-        animationRunning = true;
-        player.animations.play('walk_down',10,true);
-        tween.onComplete.addOnce(stopWalking, this);
-    }else if (speechInput.indexOf('up') > -1 && animationRunning === false
-        || cursors.up.isDown
-        && !cursors.left.isDown && animationRunning === false
-        ) {
-        //tween up
-        walk(0,-100);
-        player.scale.setTo(1,1); //Unmirror character
-        animationRunning = true;
-        player.animations.play('walk_up',10,true);
-        tween.onComplete.addOnce(stopWalking, this);
+            speechInput = '';
+
+        } else if (speechInput.indexOf('right') > -1
+            || cursors.right.isDown
+            && !cursors.left.isDown) {
+            //tween right
+            walk(player, 100, 0, 'walk_right', 20);
+            player.scale.setTo(1,1); //Unmirror character
+
+            su.text = 'Okay, going right.';
+            speechSynthesis.speak(su);
+            
+            speechInput = '';
+
+        } else if (speechInput.indexOf('down') > -1
+            || cursors.down.isDown
+            && !cursors.left.isDown) {
+            //tween down
+            walk(player, 0, 100, 'walk_down', 10);
+            player.scale.setTo(1,1); //Unmirror character
+            
+            su.text = 'Okay, going down now if you don\'t mind.';
+            speechSynthesis.speak(su);
+
+            speechInput = '';
+
+        } else if (speechInput.indexOf('up') > -1
+            || cursors.up.isDown
+            && !cursors.left.isDown) {
+            //tween up
+            walk(player, 0, -100, 'walk_up', 10);
+            player.scale.setTo(1,1); //Unmirror character
+
+            su.text = 'Now I\'m going up, tra la la la';
+            speechSynthesis.speak(su);
+            
+            speechInput = '';
+        }
     }
 }
 
@@ -217,20 +219,30 @@ function createBaddie() {
     baddie.frame = 2;
 }
 
-function walk (destinationX, destinationY) {
-  //Calculate new position
-  var newX = this.player.x + destinationX;
-  var newY = this.player.y + destinationY;
+function walk (character, destinationX, destinationY, animation, animationVal) {
+    //Calculate new position
+    var newX = character.x + destinationX;
+    var newY = character.y + destinationY;
 
-  //Create a transition to the new location
-  tween = this.game.add.tween(this.player).to({x:newX, y:newY}, 800, null, true);
+    //Create a transition to the new location
+    if(newX < game.world.width && newX > 0 && newY < game.world.height && newY > 0) {
+        character.animations.play(animation, animationVal, true);
+        animationRunning = true;
+        console.log(character.key+' is moving')
+        tween = this.game.add.tween(character).to({x:newX, y:newY}, 800, null, true);
+        tween.onComplete.addOnce(stopWalking, this);
+    } else {
+        stopWalking(character);
+    }
+    
 }
 
-function stopWalking (item) {
+function stopWalking (character) {
     // player.animations.stop('walk',true);
-    player.animations.play('idle');
+    character.animations.play('idle');
     animationRunning = false;
-    player.frame = 4;
+    character.frame = 4;
+    console.log(character.key+' is idle');
 }
 
 function collectStar (player, star) {
