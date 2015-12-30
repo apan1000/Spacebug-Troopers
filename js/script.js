@@ -233,7 +233,6 @@ function stopWalking (character) {
     // player.animations.stop('walk',true);
     character.animations.play('idle');
     animationRunning = false;
-    character.frame = 4;
     console.log(character.key+' is idle');
 }
 
