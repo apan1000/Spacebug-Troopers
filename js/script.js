@@ -5,7 +5,7 @@ function preload() {
     //Cessmap background. Each square is 100px.
     game.load.image('chessmap', 'assets/chessmap.png');
     game.load.image('star', 'assets/star.png');
-    game.load.spritesheet('dude', 'assets/dude.png', 32, 48);
+    game.load.spritesheet('voxobot', 'assets/voxobot.png', 64, 96);
     game.load.spritesheet('baddie', 'assets/baddie.png', 32, 48);
 
 }
@@ -24,7 +24,7 @@ var su = new SpeechSynthesisUtterance();
 su.lang = language;
 su.rate = 2;
 su.pitch = 1.5;
-su.text = 'Hello Dude';
+su.text = 'Hello voxobot';
 speechSynthesis.speak(su);
 
 var player;
@@ -137,7 +137,7 @@ function update() {
             //tween left
             walk(player, -100, 0, 'walk_right', 20);
             player.scale.setTo(-1,1); //Mirror character
-            
+
             su.text = 'Okay, going left.';
             speechSynthesis.speak(su);
 
@@ -152,7 +152,7 @@ function update() {
 
             su.text = 'Okay, going right.';
             speechSynthesis.speak(su);
-            
+
             speechInput = '';
 
         } else if (speechInput.indexOf('down') > -1
@@ -161,7 +161,7 @@ function update() {
             //tween down
             walk(player, 0, 100, 'walk_down', 10);
             player.scale.setTo(1,1); //Unmirror character
-            
+
             su.text = 'Okay, going down now if you don\'t mind.';
             speechSynthesis.speak(su);
 
@@ -176,7 +176,7 @@ function update() {
 
             su.text = 'Now I\'m going up, tra la la la';
             speechSynthesis.speak(su);
-            
+
             speechInput = '';
         }
     }
@@ -184,7 +184,7 @@ function update() {
 
 function createPlayer() {
     // The player and its settings
-    player = game.add.sprite(350, 350, 'dude');
+    player = game.add.sprite(350, 350, 'voxobot');
     // Set anchor to middle so that character can be flipped without movement.
     player.anchor.setTo(.5, .5);
 
@@ -198,8 +198,6 @@ function createPlayer() {
     player.animations.add('walk_down', row(2), 10, true);
     player.animations.add('walk_up', row(3), 10, true);
     animationRunning = false;
-
-
 
     //player starts by standing still facing camera
     player.frame = 4;
@@ -234,7 +232,7 @@ function walk (character, destinationX, destinationY, animation, animationVal) {
     } else {
         stopWalking(character);
     }
-    
+
 }
 
 function stopWalking (character) {
