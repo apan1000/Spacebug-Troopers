@@ -198,9 +198,6 @@ function createPlayer() {
     player.animations.add('walk_down', row(2), 10, true);
     player.animations.add('walk_up', row(3), 10, true);
     animationRunning = false;
-
-    //player starts by standing still facing camera
-    player.frame = 4;
 }
 
 function createBaddie() {
@@ -212,9 +209,6 @@ function createBaddie() {
     // Walking animation (turned left)
     //baddie.animations.add('walk', [0, 1, 2, 3], 10, true);
     //animationRunning = false;
-
-    //player starts by standing still facing camera
-    baddie.frame = 2;
 }
 
 function walk (character, destinationX, destinationY, animation, animationVal) {
