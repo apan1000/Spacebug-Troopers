@@ -5,7 +5,8 @@ function preload() {
     //Cessmap background. Each square is 100px.
     game.load.image('chessmap', 'assets/chessmap.png');
     game.load.image('star', 'assets/star.png');
-    game.load.spritesheet('voxobot', 'assets/voxobot.png', 64, 96);
+    //game.load.spritesheet('voxobot', 'assets/voxobot.png', 64, 96);
+    game.load.spritesheet('redsoldier', 'assets/redsoldier_spritesheet.png', 100, 100);
     game.load.spritesheet('baddie', 'assets/baddie.png', 32, 48);
 
 }
@@ -81,19 +82,19 @@ function create() {
     stars.enableBody = true;
 
     //  Here we'll create some stars and place them at random squares across the board
-    oddNumbers = [1,3,5,7,9,11,13];
-    for (var i = 0; i < 5; i++)
-    {
-        randOddX = oddNumbers[Math.floor(Math.random()*6)];
-        randOddY = oddNumbers[Math.floor(Math.random()*6)];
-        randPlaceX = Math.floor((Math.random() * randOddX) + 1) * 50;
-        randPlaceY = Math.floor((Math.random() * randOddY) + 1) * 50;
-        console.log(randPlaceX);
-        console.log(randPlaceY);
-        //  Create a star inside of the 'stars' group
-        var star = stars.create(randPlaceX, randPlaceY, 'star');
-        i = i+1;
-    }
+    // oddNumbers = [1,3,5,7,9,11,13];
+    // for (var i = 0; i < 5; i++)
+    // {
+    //     randOddX = oddNumbers[Math.floor(Math.random()*6)];
+    //     randOddY = oddNumbers[Math.floor(Math.random()*6)];
+    //     randPlaceX = Math.floor((Math.random() * randOddX) + 1) * 50;
+    //     randPlaceY = Math.floor((Math.random() * randOddY) + 1) * 50;
+    //     console.log(randPlaceX);
+    //     console.log(randPlaceY);
+    //     //  Create a star inside of the 'stars' group
+    //     var star = stars.create(randPlaceX, randPlaceY, 'star');
+    //     i = i+1;
+    // }
 
     //  The score
     scoreText = game.add.text(16, 16, 'score: 0', { fontSize: '32px', fill: '#000' });
@@ -135,8 +136,8 @@ function update() {
             || cursors.left.isDown
             && !cursors.right.isDown) {
             //tween left
-            walk(player, -100, 0, 'walk_right', 20);
-            player.scale.setTo(-1,1); //Mirror character
+            walk(player, -100, 0, 'walk_left', 10);
+            player.scale.setTo(1,1); //Mirror character
 
             su.text = 'Okay, going left.';
             speechSynthesis.speak(su);
@@ -147,8 +148,8 @@ function update() {
             || cursors.right.isDown
             && !cursors.left.isDown) {
             //tween right
-            walk(player, 100, 0, 'walk_right', 20);
-            player.scale.setTo(1,1); //Unmirror character
+            walk(player, 100, 0, 'walk_left', 10);
+            player.scale.setTo(-1,1); //Unmirror character
 
             su.text = 'Okay, going right.';
             speechSynthesis.speak(su);
@@ -179,24 +180,22 @@ function update() {
 
             speechInput = '';
         }
-    }
+    } 
 }
 
 function createPlayer() {
     // The player and its settings
-    player = game.add.sprite(350, 350, 'voxobot');
+    player = game.add.sprite(350, 650, 'redsoldier');
     // Set anchor to middle so that character can be flipped without movement.
     player.anchor.setTo(.5, .5);
 
     // Define animation
     // FORMAT: {what}.animations.add({action}, {frames}, {framerate}, {loop?})
 
-    // An animation of the character standing idle
-    player.animations.add('idle', row(0), 10, true);
     // Walking animation (turned right)
-    player.animations.add('walk_right', row(1), 10, true);
-    player.animations.add('walk_down', row(2), 10, true);
-    player.animations.add('walk_up', row(3), 10, true);
+    player.animations.add('walk_left', row(2), 10, true);
+    player.animations.add('walk_down', row(0), 10, true);
+    player.animations.add('walk_up', row(1), 10, true);
     animationRunning = false;
 }
 
@@ -205,10 +204,6 @@ function createBaddie() {
     baddie = game.add.sprite(350, 50, 'baddie');
     // Set anchor to middle so that character can be flipped without movement.
     baddie.anchor.setTo(.5, .5);
-
-    // Walking animation (turned left)
-    //baddie.animations.add('walk', [0, 1, 2, 3], 10, true);
-    //animationRunning = false;
 }
 
 function walk (character, destinationX, destinationY, animation, animationVal) {
@@ -230,9 +225,11 @@ function walk (character, destinationX, destinationY, animation, animationVal) {
 }
 
 function stopWalking (character) {
-    // player.animations.stop('walk',true);
-    character.animations.play('idle');
+    player.animations.stop('walk_left',true);
+    player.animations.stop('walk_up',true);
+    player.animations.stop('walk_down',true);
     animationRunning = false;
+    character.frame = 0;
     console.log(character.key+' is idle');
 }
 
