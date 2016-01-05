@@ -7,6 +7,8 @@ function preload() {
     game.load.image('star', 'assets/star.png');
     //game.load.spritesheet('voxobot', 'assets/voxobot.png', 64, 96);
     game.load.spritesheet('redsoldier', 'assets/redsoldier_spritesheet.png', 100, 100);
+    game.load.spritesheet('greensoldier', 'assets/redsoldier_spritesheet.png', 100, 100);
+    game.load.spritesheet('bluesoldier', 'assets/redsoldier_spritesheet.png', 100, 100);
     game.load.spritesheet('monster', 'assets/monster_spritesheet.png', 100, 100);
 
 }
@@ -29,7 +31,10 @@ su.text = 'Hello voxobot';
 speechSynthesis.speak(su);
 
 var player;
-var monster;
+var monsters = [];
+var monster1;
+var monster2;
+var monster3;
 var platforms;
 var cursors;
 var animationRunning = false;
@@ -39,9 +44,14 @@ var score = 0;
 var scoreText;
 
 // Get frames for a row from a spritesheet.
-function row(number){
-  var pos = number*4;
-  return [pos, 1+pos, 2+pos, 3+pos];
+function row(number, col){
+    if (col == 4) {
+        var pos = number*4;
+        return [pos, 1+pos, 2+pos, 3+pos];
+    } else if (col == 3) {
+        var pos = number*3;
+        return [pos, 1+pos, 2+pos];
+    }
 }
 
 recognition.onresult = function(event) {
@@ -144,6 +154,8 @@ function update() {
 
             speechInput = '';
 
+            monsterAction();
+
         } else if (speechInput.indexOf('right') > -1
             || cursors.right.isDown
             && !cursors.left.isDown) {
@@ -155,6 +167,8 @@ function update() {
             speechSynthesis.speak(su);
 
             speechInput = '';
+
+            monsterAction();
 
         } else if (speechInput.indexOf('down') > -1
             || cursors.down.isDown
@@ -168,6 +182,8 @@ function update() {
 
             speechInput = '';
 
+            monsterAction();
+
         } else if (speechInput.indexOf('up') > -1
             || cursors.up.isDown
             && !cursors.left.isDown) {
@@ -179,6 +195,8 @@ function update() {
             speechSynthesis.speak(su);
 
             speechInput = '';
+
+            monsterAction();
         }
     } 
 }
@@ -192,23 +210,40 @@ function createPlayer() {
     // Define animation
     // FORMAT: {what}.animations.add({action}, {frames}, {framerate}, {loop?})
 
-    // Walking animation (turned right)
-    player.animations.add('walk_left', row(2), 10, true);
-    player.animations.add('walk_down', row(0), 10, true);
-    player.animations.add('walk_up', row(1), 10, true);
+    // Walking animation
+    player.animations.add('walk_left', row(2, 4), 10, true);
+    player.animations.add('walk_down', row(0, 4), 10, true);
+    player.animations.add('walk_up', row(1, 4), 10, true);
     animationRunning = false;
 }
 
 function createMonster() {
     // The player and its settings
-    monster = game.add.sprite(350, 50, 'monster');
+    monsters = game.add.group();
+    monsters.enableBody = true;
+
+    var p = 0;
+    for (var i = 0; i < 3; i++) {
+
+        var monster = monsters.create(250 + p, 50, 'monster');
+        monster.anchor.setTo(.5, .5);
+
+        //createMonster(250 + p, 50);
+        p = p + 100;
+        console.log(i);
+        
+    }
+    console.log("Player; ", player);
+    console.log("Monsters; ", monsters);
+
+    monsters.callAll('animations.add', 'animations', 'walk_down', row(0, 3), 10, true);
+    monsters.callAll('play', null, 'walk_down');
+
     // Set anchor to middle so that character can be flipped without movement.
-    monster.anchor.setTo(.5, .5);
 
     // monster.animations.add('walk_left', row(2), 10, true);
     // monster.animations.add('walk_down', row(0), 10, true);
     // monster.animations.add('walk_up', row(1), 10, true);
-    animationRunning = false;
 }
 
 function walk (character, destinationX, destinationY, animation, animationVal) {
@@ -236,6 +271,14 @@ function stopWalking (character) {
     animationRunning = false;
     character.frame = 0;
     console.log(character.key+' is idle');
+}
+
+function monsterAction () {
+    console.log("Chosen monster; ", monsters[Math.random()*3 + 1]);
+    var randomMon = monsters.getRandom();//Math.floor(Math.random()*3);
+    console.log(randomMon);
+    walk(randomMon, 0, 100, 'walk_down', 10);
+    //monsters[randomMon]
 }
 
 function collectStar (player, star) {
