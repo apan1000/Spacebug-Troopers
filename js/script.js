@@ -37,9 +37,6 @@ speechSynthesis.speak(su);
 
 var player;
 var monsters = [];
-var monster1;
-var monster2;
-var monster3;
 var platforms;
 var cursors;
 var animationRunning = false;
@@ -62,8 +59,6 @@ var playerXPos;
 var playerYPos;
 var SFX;
 // New variables
-
-
 
 
 // Get frames for a row from a spritesheet.
@@ -246,11 +241,6 @@ function update() {
     
 }
 
-
-
-
-
-
 function createPlayer() {
     // The player and its settings
     player = game.add.sprite(350, 650, 'redsoldier');
@@ -280,20 +270,13 @@ function createMonster() {
 
         //createMonster(250 + p, 50);
         p = p + 100;
-        console.log(i);
-        
+        console.log(i);   
     }
     console.log("Player; ", player);
     console.log("Monsters; ", monsters);
 
     monsters.callAll('animations.add', 'animations', 'walk_down', row(0, 3), 10, true);
     monsters.callAll('play', null, 'walk_down');
-
-    // Set anchor to middle so that character can be flipped without movement.
-
-    // monster.animations.add('walk_left', row(2), 10, true);
-    // monster.animations.add('walk_down', row(0), 10, true);
-    // monster.animations.add('walk_up', row(1), 10, true);
 }
 
 function walk (character, destinationX, destinationY, animation, animationVal) {
@@ -324,11 +307,29 @@ function stopWalking (character) {
 }
 
 function monsterAction () {
+    playerXPos = player.position.x;
+    playerYPos = player.position.y;
     console.log("Chosen monster; ", monsters[Math.random()*3 + 1]);
-    var randomMon = monsters.getRandom();//Math.floor(Math.random()*3);
+    var randomMon = monsters.getRandom();
     console.log(randomMon);
-    walk(randomMon, 0, 100, 'walk_down', 10);
-    //monsters[randomMon]
+    monsterXPos = randomMon.position.x; 
+    monsterYPos = randomMon.position.y; 
+
+    if (Math.abs(playerXPos - monsterXPos) < Math.abs(playerYPos - monsterYPos) 
+        || Math.abs(playerXPos - monsterXPos) == Math.abs(playerYPos - monsterYPos)) {
+        if (playerYPos > monsterYPos) {
+            walk(randomMon, 0, 100, 'walk_down', 10);
+        } else {
+            walk(randomMon, 0, -100, 'walk_up', 10);
+        }
+    } else if (Math.abs(playerXPos - monsterXPos) > Math.abs(playerYPos - monsterYPos)
+        || Math.abs(playerXPos - monsterXPos) == Math.abs(playerYPos - monsterYPos)) {
+        if (playerXPos > monsterXPos) {
+            walk(randomMon, 100, 0, 'walk_right', 10);
+        } else {
+            walk(randomMon, -100, 0, 'walk_left', 10);
+        }
+    }
 }
 
 function collectStar (player, star) {
@@ -344,86 +345,84 @@ function collectStar (player, star) {
     score += 10;
     scoreText.text = 'Score: ' + score;
     
-    }
+}
     
-    // New Functions
-    
-    
-    function decreaseEnemyHealth(){
+// New Functions
+        
+function decreaseEnemyHealth(){
     enemyHealthBar.cropRect.width -= healthBarWidth*0.1;
     enemyHealthBar.updateCrop();
-    }
+}
     
-    function decreaseAP(){
+function decreaseAP(){
     AP -= 1;
     APText.text = 'AP: ' + AP;
-    }
+}
     
     
-    function attackEnemy(){
+function attackEnemy(){
 
-        
-        playerXPos = player.position.x;
-        playerYPos = player.position.y;
-
-        console.log(monster.position);
-        walk(
-        player, 
-        monster.position.x-player.position.x,
-        monster.position.y-player.position.y+monster.height,
-        'walk_up',
-        2);
-        
-        //(character, destinationX, destinationY, animation, animationVal)
-        
-        //player.scale.setTo(-1,1); //Mirror character
-        animationRunning = true;
-        tween.onComplete.addOnce(createExplosion, this);
-        tween.onComplete.addOnce(decreaseAP, this);     
-
-        tween.onComplete.addOnce(decreaseEnemyHealth, this);
-        tween.onComplete.addOnce(stopWalking, this);
-        tween.onComplete.addOnce(moveBack, this);
-        player.animations.play('walk_up',20,true);
-      
-    }
-
-    function moveBack(){
-        walk(
-        player,
-        playerXPos- player.position.x, 
-        playerYPos- player.position.y,
-        'walk_back',
-        2);
-         
-        animationRunning = true;
-        tween.onComplete.addOnce(stopWalking, this);
-        player.animations.play('walk_down',20,true);
-
-    }
     
+    playerXPos = player.position.x;
+    playerYPos = player.position.y;
+
+    console.log(monster.position);
+    walk(
+    player, 
+    monster.position.x-player.position.x,
+    monster.position.y-player.position.y+monster.height,
+    'walk_up',
+    2);
     
-    function createExplosion(){
-        var explosion = this.add.sprite(monster.x, monster.y, 'explosion');
-        explosion.anchor.setTo(0.5, 0.5);
-        explosion.animations.add('boom');
-        explosion.play('boom', 15, false, true);
-        SFX.play();
-    }
-
-    function createHealthBars(){
-        playerHealthBar = game.add.sprite(0, game.world.height-healthBarHeight, 'healthBar');   /////////
-        playerHealthBar.crop(new Phaser.Rectangle(0,0,healthBarWidth,healthBarHeight)); 
-        enemyHealthBar = game.add.sprite(0, 0, 'healthBar');    /////////
-        enemyHealthBar.crop(new Phaser.Rectangle(0,0,healthBarWidth,healthBarHeight));
-        APText = game.add.text(0, game.world.height-(healthBarHeight*2), 'AP: ' + AP, { fontSize: '32px',           fill: '#000' });
-    }
+    //(character, destinationX, destinationY, animation, animationVal)
     
-    
+    //player.scale.setTo(-1,1); //Mirror character
+    animationRunning = true;
+    tween.onComplete.addOnce(createExplosion, this);
+    tween.onComplete.addOnce(decreaseAP, this);     
+
+    tween.onComplete.addOnce(decreaseEnemyHealth, this);
+    tween.onComplete.addOnce(stopWalking, this);
+    tween.onComplete.addOnce(moveBack, this);
+    player.animations.play('walk_up',20,true);
+  
+}
+
+function moveBack(){
+    walk(
+    player,
+    playerXPos- player.position.x, 
+    playerYPos- player.position.y,
+    'walk_back',
+    2);
+     
+    animationRunning = true;
+    tween.onComplete.addOnce(stopWalking, this);
+    player.animations.play('walk_down',20,true);
+
+}
+
+function createExplosion(){
+    var explosion = this.add.sprite(monster.x, monster.y, 'explosion');
+    explosion.anchor.setTo(0.5, 0.5);
+    explosion.animations.add('boom');
+    explosion.play('boom', 15, false, true);
+    SFX.play();
+}
+
+function createHealthBars(){
+    playerHealthBar = game.add.sprite(0, game.world.height-healthBarHeight, 'healthBar');   /////////
+    playerHealthBar.crop(new Phaser.Rectangle(0,0,healthBarWidth,healthBarHeight)); 
+    enemyHealthBar = game.add.sprite(0, 0, 'healthBar');    /////////
+    enemyHealthBar.crop(new Phaser.Rectangle(0,0,healthBarWidth,healthBarHeight));
+    APText = game.add.text(0, game.world.height-(healthBarHeight*2), 'AP: ' + AP, { fontSize: '32px',           fill: '#000' });
+}
 
 
 
-    // New functions
+
+
+// New functions
     
     
     
