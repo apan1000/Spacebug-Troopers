@@ -7,7 +7,7 @@ function preload() {
     game.load.image('star', 'assets/star.png');
     //game.load.spritesheet('voxobot', 'assets/voxobot.png', 64, 96);
     game.load.spritesheet('redsoldier', 'assets/redsoldier_spritesheet.png', 100, 100);
-    game.load.spritesheet('baddie', 'assets/baddie.png', 32, 48);
+    game.load.spritesheet('monster', 'assets/monster_spritesheet.png', 100, 100);
 
 }
 
@@ -29,7 +29,7 @@ su.text = 'Hello voxobot';
 speechSynthesis.speak(su);
 
 var player;
-var baddie;
+var monster;
 var platforms;
 var cursors;
 var animationRunning = false;
@@ -75,7 +75,7 @@ function create() {
     game.add.sprite(0, 0, 'chessmap');
 
     createPlayer();
-    createBaddie();
+    createMonster();
 
     //  Finally some stars to collect
     stars = game.add.group();
@@ -199,11 +199,16 @@ function createPlayer() {
     animationRunning = false;
 }
 
-function createBaddie() {
+function createMonster() {
     // The player and its settings
-    baddie = game.add.sprite(350, 50, 'baddie');
+    monster = game.add.sprite(350, 50, 'monster');
     // Set anchor to middle so that character can be flipped without movement.
-    baddie.anchor.setTo(.5, .5);
+    monster.anchor.setTo(.5, .5);
+
+    // monster.animations.add('walk_left', row(2), 10, true);
+    // monster.animations.add('walk_down', row(0), 10, true);
+    // monster.animations.add('walk_up', row(1), 10, true);
+    animationRunning = false;
 }
 
 function walk (character, destinationX, destinationY, animation, animationVal) {
