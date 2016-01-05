@@ -8,7 +8,12 @@ function preload() {
     //game.load.spritesheet('voxobot', 'assets/voxobot.png', 64, 96);
     game.load.spritesheet('redsoldier', 'assets/redsoldier_spritesheet.png', 100, 100);
     game.load.spritesheet('monster', 'assets/monster_spritesheet.png', 100, 100);
-
+    
+    // New preloads
+    game.load.image('healthBar', 'assets/health.png');
+    game.load.spritesheet('explosion', 'assets/explosion.png', 32,32);
+    game.load.audio('sfx', 'assets/SFX/Explosion.wav');
+    // New preloads
 }
 
 var language = 'en_US';
@@ -37,6 +42,24 @@ var animationRunning = false;
 var stars;
 var score = 0;
 var scoreText;
+
+
+// New variables
+var playerHealth;
+var enemyHealth;
+var healthBarWidth = 300;
+var healthBarHeight = 30;
+var AP = 10;
+var APText;
+var aKey;
+var explosion;
+var playerXPos;
+var playerYPos;
+var SFX;
+// New variables
+
+
+
 
 // Get frames for a row from a spritesheet.
 function row(number){
@@ -71,12 +94,24 @@ recognition.onresult = function(event) {
 
 function create() {
 
+    // New create stuff
+    SFX = game.add.audio('sfx');
+    SFX.allowMultiple = true;
+    
+    // Definera knapptryck
+    aKey = game.input.keyboard.addKey(Phaser.Keyboard.A);
+    eKey = game.input.keyboard.addKey(Phaser.Keyboard.E);
+    // New create stuff
+
     //  A simple background for our game
     game.add.sprite(0, 0, 'chessmap');
 
     createPlayer();
     createMonster();
-
+    // New create stuff
+    createHealthBars();
+    // New create stuff
+    
     //  Finally some stars to collect
     stars = game.add.group();
     stars.enableBody = true;
@@ -181,7 +216,22 @@ function update() {
             speechInput = '';
         }
     } 
+    
+    // New update functions
+    aKey.onDown.add(attackEnemy, this);
+    if (speechInput.indexOf('attack') > -1){
+         attackEnemy();
+    }
+    eKey.onDown.add(createExplosion, this);
+    // New update functions
+    
+    
 }
+
+
+
+
+
 
 function createPlayer() {
     // The player and its settings
@@ -250,5 +300,88 @@ function collectStar (player, star) {
     //  Add and update the score
     score += 10;
     scoreText.text = 'Score: ' + score;
+    
+    }
+    
+    // New Functions
+    
+    
+    function decreaseEnemyHealth(){
+    enemyHealthBar.cropRect.width -= healthBarWidth*0.1;
+    enemyHealthBar.updateCrop();
+    }
+    
+    function decreaseAP(){
+    AP -= 1;
+    APText.text = 'AP: ' + AP;
+    }
+    
+    
+    function attackEnemy(){
 
-}
+        
+        playerXPos = player.position.x;
+        playerYPos = player.position.y;
+
+        console.log(monster.position);
+        walk(
+        player, 
+        monster.position.x-player.position.x,
+        monster.position.y-player.position.y+monster.height,
+        'walk_up',
+        2);
+        
+        //(character, destinationX, destinationY, animation, animationVal)
+        
+        //player.scale.setTo(-1,1); //Mirror character
+        animationRunning = true;
+        tween.onComplete.addOnce(createExplosion, this);
+        tween.onComplete.addOnce(decreaseAP, this);     
+
+        tween.onComplete.addOnce(decreaseEnemyHealth, this);
+        tween.onComplete.addOnce(stopWalking, this);
+        tween.onComplete.addOnce(moveBack, this);
+        player.animations.play('walk_up',20,true);
+      
+    }
+
+    function moveBack(){
+        walk(
+        player,
+        playerXPos- player.position.x, 
+        playerYPos- player.position.y,
+        'walk_back',
+        2);
+         
+        animationRunning = true;
+        tween.onComplete.addOnce(stopWalking, this);
+        player.animations.play('walk_down',20,true);
+
+    }
+    
+    
+    function createExplosion(){
+        var explosion = this.add.sprite(monster.x, monster.y, 'explosion');
+        explosion.anchor.setTo(0.5, 0.5);
+        explosion.animations.add('boom');
+        explosion.play('boom', 15, false, true);
+        SFX.play();
+    }
+
+    function createHealthBars(){
+        playerHealthBar = game.add.sprite(0, game.world.height-healthBarHeight, 'healthBar');   /////////
+        playerHealthBar.crop(new Phaser.Rectangle(0,0,healthBarWidth,healthBarHeight)); 
+        enemyHealthBar = game.add.sprite(0, 0, 'healthBar');    /////////
+        enemyHealthBar.crop(new Phaser.Rectangle(0,0,healthBarWidth,healthBarHeight));
+        APText = game.add.text(0, game.world.height-(healthBarHeight*2), 'AP: ' + AP, { fontSize: '32px',           fill: '#000' });
+    }
+    
+    
+
+
+
+    // New functions
+    
+    
+    
+    
