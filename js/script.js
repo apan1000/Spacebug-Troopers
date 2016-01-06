@@ -7,8 +7,8 @@ function preload() {
     game.load.image('star', 'assets/star.png');
     //game.load.spritesheet('voxobot', 'assets/voxobot.png', 64, 96);
     game.load.spritesheet('redsoldier', 'assets/redsoldier_spritesheet.png', 100, 100);
-    game.load.spritesheet('greensoldier', 'assets/redsoldier_spritesheet.png', 100, 100);
-    game.load.spritesheet('bluesoldier', 'assets/redsoldier_spritesheet.png', 100, 100);
+    game.load.spritesheet('greensoldier', 'assets/greensoldier_spritesheet.png', 100, 100);
+    game.load.spritesheet('bluesoldier', 'assets/bluesoldier_spritesheet.png', 100, 100);
     game.load.spritesheet('monster', 'assets/monster_spritesheet.png', 100, 100);
     
     // New preloads
@@ -36,6 +36,9 @@ su.text = 'Hello voxobot';
 speechSynthesis.speak(su);
 
 var player;
+var redsoldier;
+var greensoldier;
+var bluesoldier;
 var monsters = [];
 var platforms;
 var cursors;
@@ -73,10 +76,8 @@ function row(number, col){
 }
 
 recognition.onresult = function(event) {
-  // if (event.results.length > 0) {
     speechInput = '';
-    // console.log(event);
-    // for (var i = event.resultIndex; i < event.results.length; ++i) {
+
     for (var i = event.resultIndex; i < event.results.length; ++i) {
         if (event.results[i].isFinal) {
             final_transcript += event.results[i][0].transcript;
@@ -111,7 +112,7 @@ function create() {
     //  A simple background for our game
     game.add.sprite(0, 0, 'chessmap');
 
-    createPlayer();
+    createSoldiers();
     createMonster();
     // New create stuff
     createHealthBars();
@@ -172,10 +173,31 @@ function update() {
     }
 
     if(animationRunning === false) {
+
+        //Check which soldier should move.
+        if (speechInput.indexOf('red') > -1) {
+            player = soldiers.iterate('key', 'redsoldier', Phaser.Group.RETURN_CHILD);
+            speechInput = '';
+            console.log("Chosen soldier: ", player.key);
+        } 
+        if (speechInput.indexOf('green') > -1) {
+            player = soldiers.iterate('key', 'greensoldier', Phaser.Group.RETURN_CHILD);
+            speechInput = '';
+            console.log("Chosen soldier: ", player.key);
+        } 
+        if (speechInput.indexOf('blue') > -1) {
+            player = soldiers.iterate('key', 'bluesoldier', Phaser.Group.RETURN_CHILD);
+            speechInput = '';
+            console.log("Chosen soldier: ", player.key);
+        }
+
+        //Check direction
         if (speechInput.indexOf('left') > -1
             || cursors.left.isDown
             && !cursors.right.isDown) {
-            //tween left
+            
+            //Move left
+            console.log("Moving player: ", player.key);
             walk(player, -100, 0, 'walk_left', 10);
             player.scale.setTo(1,1); //Mirror character
 
@@ -189,7 +211,9 @@ function update() {
         } else if (speechInput.indexOf('right') > -1
             || cursors.right.isDown
             && !cursors.left.isDown) {
-            //tween right
+
+            //Move right
+            console.log("Moving player: ", player.key);
             walk(player, 100, 0, 'walk_left', 10);
             player.scale.setTo(-1,1); //Unmirror character
 
@@ -203,7 +227,9 @@ function update() {
         } else if (speechInput.indexOf('down') > -1
             || cursors.down.isDown
             && !cursors.left.isDown) {
-            //tween down
+
+            //Move down
+            console.log("Moving player: ", player.key);
             walk(player, 0, 100, 'walk_down', 10);
             player.scale.setTo(1,1); //Unmirror character
 
@@ -217,7 +243,9 @@ function update() {
         } else if (speechInput.indexOf('up') > -1
             || cursors.up.isDown
             && !cursors.left.isDown) {
-            //tween up
+
+            //Move up
+            console.log("Moving player: ", player.key);
             walk(player, 0, -100, 'walk_up', 10);
             player.scale.setTo(1,1); //Unmirror character
 
@@ -241,45 +269,52 @@ function update() {
     
 }
 
-function createPlayer() {
-    // The player and its settings
-    player = game.add.sprite(350, 650, 'redsoldier');
-    // Set anchor to middle so that character can be flipped without movement.
-    player.anchor.setTo(.5, .5);
+function createSoldiers() {
 
-    // Define animation
-    // FORMAT: {what}.animations.add({action}, {frames}, {framerate}, {loop?})
+    //Create soldier group
+    soldiers = game.add.group();
+    soldiers.enableBody = true;
 
-    // Walking animation
-    player.animations.add('walk_left', row(2, 4), 10, true);
-    player.animations.add('walk_down', row(0, 4), 10, true);
-    player.animations.add('walk_up', row(1, 4), 10, true);
+    //Add soldiers to group. Set anchor to middle so that character can be flipped without movement.
+    var greensoldier = soldiers.create(250, 650, 'greensoldier');
+    greensoldier.anchor.setTo(.5, .5);
+
+    var redsoldier = soldiers.create(350, 650, 'redsoldier');
+    redsoldier.anchor.setTo(.5, .5);
+
+    var bluesoldier = soldiers.create(450, 650, 'bluesoldier');
+    bluesoldier.anchor.setTo(.5, .5);
+
+    //Add animations to group
+    soldiers.callAll('animations.add', 'animations', 'walk_down', row(0, 4), 10, true);
+    soldiers.callAll('animations.add', 'animations', 'walk_up', row(1, 4), 10, true);
+    soldiers.callAll('animations.add', 'animations', 'walk_left', row(2, 4), 10, true);
     animationRunning = false;
 }
 
 function createMonster() {
-    // The player and its settings
+
+    //Create monster group
     monsters = game.add.group();
     monsters.enableBody = true;
 
+    //Add monsters to group
     var p = 0;
     for (var i = 0; i < 3; i++) {
-
         var monster = monsters.create(250 + p, 50, 'monster');
         monster.anchor.setTo(.5, .5);
-
-        //createMonster(250 + p, 50);
-        p = p + 100;
-        console.log(i);   
+        p = p + 100; 
     }
-    console.log("Player; ", player);
-    console.log("Monsters; ", monsters);
 
+    //Add anomations to group. Play animation continiously.
     monsters.callAll('animations.add', 'animations', 'walk_down', row(0, 3), 10, true);
     monsters.callAll('play', null, 'walk_down');
 }
 
 function walk (character, destinationX, destinationY, animation, animationVal) {
+
+    console.log("Character: ", character.key);
+    
     //Calculate new position
     var newX = character.x + destinationX;
     var newY = character.y + destinationY;
@@ -298,6 +333,8 @@ function walk (character, destinationX, destinationY, animation, animationVal) {
 }
 
 function stopWalking (character) {
+
+    //Stop walking animations
     player.animations.stop('walk_left',true);
     player.animations.stop('walk_up',true);
     player.animations.stop('walk_down',true);
@@ -309,7 +346,6 @@ function stopWalking (character) {
 function monsterAction () {
     playerXPos = player.position.x;
     playerYPos = player.position.y;
-    console.log("Chosen monster; ", monsters[Math.random()*3 + 1]);
     var randomMon = monsters.getRandom();
     console.log(randomMon);
     monsterXPos = randomMon.position.x; 
