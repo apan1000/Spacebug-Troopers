@@ -1,22 +1,23 @@
-var game = new Phaser.Game(700, 700, Phaser.AUTO, '', { preload: preload, create: create, update: update });
-game.ScaleManager
+// WEBSPEECH API VARIABLES
 
-var language = 'en_US';
+var SpeechRecognition = SpeechRecognition || webkitSpeechRecognition
+var SpeechGrammarList = SpeechGrammarList || webkitSpeechGrammarList
 
-var recognition = new webkitSpeechRecognition();
+var recognition = new SpeechRecognition();
+var speechRecognitionList = new SpeechGrammarList();
+
 recognition.continuous = true;
-recognition.lang = language;
+recognition.lang = 'en_US';
 recognition.interimResults = true;
 recognition.onend = function() {recognition.start();}
+
+
 var speechInput = '';
 var final_transcript = '';
 
-var su = new SpeechSynthesisUtterance();
-su.lang = language;
-su.rate = 2;
-su.pitch = 1.5;
-su.text = 'Hello voxobot';
-speechSynthesis.speak(su);
+// GAME VARIABLES
+var game = new Phaser.Game(700, 700, Phaser.AUTO, '', { preload: preload, create: create, update: update });
+game.ScaleManager
 
 var player;
 var redsoldier;
@@ -77,8 +78,10 @@ function row(number, col){
 }
 
 recognition.onresult = function(event) {
-    speechInput = '';
 
+    var speechInput = '';
+
+    // Put all results into a single string
     for (var i = event.resultIndex; i < event.results.length; ++i) {
         if (event.results[i].isFinal) {
             final_transcript += event.results[i][0].transcript;
@@ -87,15 +90,80 @@ recognition.onresult = function(event) {
         }
 
     }
-    // console.log("Input: ", speechInput);
 
+    var contains = function(word){return speechInput.indexOf(word) > -1;}
 
-    // if (event.results.length > 0) {
-    //     speechInput = event.results[0][0].transcript;
-    //     console.log(speechInput);
-    //     su.text = speechInput;
-    //     speechSynthesis.speak(su);
-    // }
+    game.debug.text(speechInput, game.world.height/2-20, game.world.width/2-30, "#000000");
+
+    if(animationRunning === false) {
+
+        //Check which soldier should move.
+        if (contains('red')) {
+            player = soldiers.iterate('key', 'redsoldier', Phaser.Group.RETURN_CHILD);
+            console.log("Chosen soldier: ", player.key);
+        }
+        if (contains('green')) {
+            player = soldiers.iterate('key', 'greensoldier', Phaser.Group.RETURN_CHILD);
+            console.log("Chosen soldier: ", player.key);
+        }
+        if (contains('blue')) {
+            player = soldiers.iterate('key', 'bluesoldier', Phaser.Group.RETURN_CHILD);
+            console.log("Chosen soldier: ", player.key);
+        }
+
+        //Check direction
+        if (contains('left')
+            || cursors.left.isDown
+            && !cursors.right.isDown) {
+
+            //Move left
+            console.log("Moving player: ", player.key);
+            walk(player, -100, 0, 'walk_left', 10);
+            player.scale.setTo(1,1); //Mirror character
+
+            monsterAction();
+
+        } else if (contains('right')
+            || cursors.right.isDown
+            && !cursors.left.isDown) {
+
+            //Move right
+            console.log("Moving player: ", player.key);
+            walk(player, 100, 0, 'walk_left', 10);
+            player.scale.setTo(-1,1); //Unmirror character
+
+            monsterAction();
+
+        } else if (contains('down')
+            || cursors.down.isDown
+            && !cursors.left.isDown) {
+
+            //Move down
+            console.log("Moving player: ", player.key);
+            walk(player, 0, 100, 'walk_down', 10);
+            player.scale.setTo(1,1); //Unmirror character
+
+            monsterAction();
+
+        } else if (contains('up')
+            || cursors.up.isDown
+            && !cursors.left.isDown) {
+
+            //Move up
+            console.log("Moving player: ", player.key);
+            walk(player, 0, -100, 'walk_up', 10);
+            player.scale.setTo(1,1); //Unmirror character
+
+            monsterAction();
+        }
+    }
+        // New update functions
+        aKey.onDown.add(attackEnemy, this);
+        if (contains('attack')){
+             attackEnemy();
+        }
+        eKey.onDown.add(createExplosion, this);
+        // New update functions
 
 }
 
@@ -169,93 +237,6 @@ function create() {
 }
 
 function update() {
-    if(speechInput != '') {
-        game.debug.text(speechInput, game.world.height/2-20, game.world.width/2, "#00c000");
-    }
-
-    if(animationRunning === false) {
-
-        //Check which soldier should move.
-        if (speechInput.indexOf('red') > -1) {
-            player = soldiers.iterate('key', 'redsoldier', Phaser.Group.RETURN_CHILD);
-            speechInput = '';
-            console.log("Chosen soldier: ", player.key);
-        }
-        if (speechInput.indexOf('green') > -1) {
-            player = soldiers.iterate('key', 'greensoldier', Phaser.Group.RETURN_CHILD);
-            speechInput = '';
-            console.log("Chosen soldier: ", player.key);
-        }
-        if (speechInput.indexOf('blue') > -1) {
-            player = soldiers.iterate('key', 'bluesoldier', Phaser.Group.RETURN_CHILD);
-            speechInput = '';
-            console.log("Chosen soldier: ", player.key);
-        }
-
-        //Check direction
-        if (speechInput.indexOf('left') > -1
-            || cursors.left.isDown
-            && !cursors.right.isDown) {
-
-            //Move left
-            console.log("Moving player: ", player.key);
-            walk(player, -100, 0, 'walk_left', 10);
-            player.scale.setTo(1,1); //Mirror character
-
-            speechInput = '';
-
-            monsterAction();
-
-        } else if (speechInput.indexOf('right') > -1
-            || cursors.right.isDown
-            && !cursors.left.isDown) {
-
-            //Move right
-            console.log("Moving player: ", player.key);
-            walk(player, 100, 0, 'walk_left', 10);
-            player.scale.setTo(-1,1); //Unmirror character
-
-            speechInput = '';
-
-            monsterAction();
-
-        } else if (speechInput.indexOf('down') > -1
-            || cursors.down.isDown
-            && !cursors.left.isDown) {
-
-            //Move down
-            console.log("Moving player: ", player.key);
-            walk(player, 0, 100, 'walk_down', 10);
-            player.scale.setTo(1,1); //Unmirror character
-
-            speechInput = '';
-
-            monsterAction();
-
-        } else if (speechInput.indexOf('up') > -1
-            || cursors.up.isDown
-            && !cursors.left.isDown) {
-
-            //Move up
-            console.log("Moving player: ", player.key);
-            walk(player, 0, -100, 'walk_up', 10);
-            player.scale.setTo(1,1); //Unmirror character
-
-            speechInput = '';
-
-            monsterAction();
-        }
-    }
-
-    // New update functions
-    aKey.onDown.add(attackEnemy, this);
-    if (speechInput.indexOf('attack') > -1){
-         attackEnemy();
-    }
-    eKey.onDown.add(createExplosion, this);
-    // New update functions
-
-
 }
 
 function createSoldiers() {
