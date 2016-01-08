@@ -103,44 +103,20 @@ recognition.onresult = function(event) {
     if(animationRunning === false) {
 
         // SELECTION COMMANDS
-        if (contains('red')|contains('green')|contains('blue')) {
+        if (contains('red')||contains('green')||contains('blue')) {
             player = soldiers.iterate('key', match+'soldier', Phaser.Group.RETURN_CHILD);
             selectedPlayerText.text = match;
             selectedPlayerText.style.fill = match;
         }
 
         // MOVEMENT COMMANDS
-        if (contains('left')) {
-            //Move left
-            walk(player, -100, 0, 'walk_left', 10);
-            player.scale.setTo(1,1); //Mirror character
-
-            monsterAction();
-
-        } else if (contains('right')) {
-
-            //Move right
-            walk(player, 100, 0, 'walk_left', 10);
-            player.scale.setTo(-1,1); //Unmirror character
-
-            monsterAction();
-
-        } else if (contains('down')) {
-
-            //Move down
-            walk(player, 0, 100, 'walk_down', 10);
-            player.scale.setTo(1,1); //Unmirror character
-
-            monsterAction();
-
-        } else if (contains('up')) {
-
-            //Move up
-            walk(player, 0, -100, 'walk_up', 10);
-            player.scale.setTo(1,1); //Unmirror character
-
-            monsterAction();
+        if (contains('up')
+        ||contains('left')
+        ||contains('left')
+        ||contains('right')) {
+            walk(player, match);
         }
+
     }
         // New update functions
         aKey.onDown.add(attackEnemy, this);
@@ -193,7 +169,7 @@ function create() {
 
     //  The score
     game.add.text(16, 30, 'Selected:', { font: '32px VT323', fill: '#000' });
-    selectedPlayerText = game.add.text(150, 30, 'ALL', { font: 'bold 32px VT323', fill: '#FFF' }); //"All" not implemented just jet...
+    selectedPlayerText = game.add.text(150, 30, 'NONE', { font: 'bold 32px VT323', fill: '#FFF' });
 
     //  Our controls.
     cursors = game.input.keyboard.createCursorKeys();
@@ -267,17 +243,28 @@ function createMonsters() {
     monsters.callAll('play', null, 'walk_down');
 }
 
-function walk (character, destinationX, destinationY, animation, animationVal) {
+function walk (character, direction) {
+    var x = 0;
+    var y = 0;
 
-    console.log("Character: ", character.key);
+    player.scale.setTo(1,1); //Unmirror character
+    switch(direction){
+        case 'up': y = -100; break;
+        case 'down': y = 100; break;
+        case 'left':x = -100; break;
+        case 'right': x = 100;
+        player.scale.setTo(-1,1); //mirror character
+        direction = 'left'; // Since mirrored, play left animation.
+        break;
+    }
 
     //Calculate new position
-    var newX = character.x + destinationX;
-    var newY = character.y + destinationY;
+    var newX = character.x + x;
+    var newY = character.y + y;
 
     //Create a transition to the new location
     if(newX < game.world.width && newX > 0 && newY < game.world.height && newY > 0) {
-        character.animations.play(animation, animationVal, true);
+        character.animations.play('walk_'+direction, 10, true);
         animationRunning = true;
         console.log(character.key+' is moving')
         tween = this.game.add.tween(character).to({x:newX, y:newY}, 800, null, true);
