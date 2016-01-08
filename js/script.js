@@ -1,10 +1,7 @@
 // WEBSPEECH API VARIABLES
 
 var SpeechRecognition = SpeechRecognition || webkitSpeechRecognition
-var SpeechGrammarList = SpeechGrammarList || webkitSpeechGrammarList
-
 var recognition = new SpeechRecognition();
-var speechRecognitionList = new SpeechGrammarList();
 
 recognition.continuous = true;
 recognition.lang = 'en_US';
@@ -30,7 +27,7 @@ var animationRunning = false;
 
 var stars;
 var score = 0;
-var scoreText;
+var selectedPlayerText;
 
 
 // New variables
@@ -91,63 +88,57 @@ recognition.onresult = function(event) {
 
     }
 
-    var contains = function(word){return speechInput.indexOf(word) > -1;}
 
     game.debug.text(speechInput, game.world.height/2-20, game.world.width/2-30, "#000000");
 
+    // A simple function to check if a word has been heard.
+    var contains = function(word){return speechInput.indexOf(word) > -1;}
+
+
     if(animationRunning === false) {
 
-        //Check which soldier should move.
+        // SELECTION COMMANDS
         if (contains('red')) {
             player = soldiers.iterate('key', 'redsoldier', Phaser.Group.RETURN_CHILD);
-            console.log("Chosen soldier: ", player.key);
+            selectedPlayerText.text = 'Selected: ' + 'red';
+            selectedPlayerText.style.fill = 'red'
         }
         if (contains('green')) {
             player = soldiers.iterate('key', 'greensoldier', Phaser.Group.RETURN_CHILD);
-            console.log("Chosen soldier: ", player.key);
+            selectedPlayerText.text = 'Selected: ' + 'green';
         }
         if (contains('blue')) {
             player = soldiers.iterate('key', 'bluesoldier', Phaser.Group.RETURN_CHILD);
-            console.log("Chosen soldier: ", player.key);
+            selectedPlayerText.text = 'Selected: ' + 'blue';
         }
 
-        //Check direction
-        if (contains('left')
-            || cursors.left.isDown
-            && !cursors.right.isDown) {
 
+
+        // MOVEMENT COMMANDS
+        if (contains('left')) {
             //Move left
-            console.log("Moving player: ", player.key);
             walk(player, -100, 0, 'walk_left', 10);
             player.scale.setTo(1,1); //Mirror character
 
             monsterAction();
 
-        } else if (contains('right')
-            || cursors.right.isDown
-            && !cursors.left.isDown) {
+        } else if (contains('right')) {
 
             //Move right
-            console.log("Moving player: ", player.key);
             walk(player, 100, 0, 'walk_left', 10);
             player.scale.setTo(-1,1); //Unmirror character
 
             monsterAction();
 
-        } else if (contains('down')
-            || cursors.down.isDown
-            && !cursors.left.isDown) {
+        } else if (contains('down')) {
 
             //Move down
-            console.log("Moving player: ", player.key);
             walk(player, 0, 100, 'walk_down', 10);
             player.scale.setTo(1,1); //Unmirror character
 
             monsterAction();
 
-        } else if (contains('up')
-            || cursors.up.isDown
-            && !cursors.left.isDown) {
+        } else if (contains('up')) {
 
             //Move up
             console.log("Moving player: ", player.key);
@@ -173,7 +164,7 @@ function create() {
     SFX = game.add.audio('sfx');
     SFX.allowMultiple = true;
 
-    // Definera knapptryck
+    // Define keys
     aKey = game.input.keyboard.addKey(Phaser.Keyboard.A);
     eKey = game.input.keyboard.addKey(Phaser.Keyboard.E);
     // New create stuff
@@ -207,7 +198,8 @@ function create() {
     // }
 
     //  The score
-    scoreText = game.add.text(16, 16, 'score: 0', { fontSize: '32px', fill: '#000' });
+    game.add.text(16, 30, 'Selected:', { font: '32px VT323', fill: '#000' });
+    selectedPlayerText = game.add.text(150, 30, 'ALL', { font: 'bold 32px VT323', fill: '#FFF' }); //"All" not implemented just jet...
 
     //  Our controls.
     cursors = game.input.keyboard.createCursorKeys();
@@ -236,7 +228,7 @@ function create() {
     recognition.start();
 }
 
-function update() {
+function update() { // Empty right now but should contain buttons
 }
 
 function createSoldiers() {
@@ -349,7 +341,7 @@ function collectStar (player, star) {
     }
     //  Add and update the score
     score += 10;
-    scoreText.text = 'Score: ' + score;
+    selectedPlayerText.text = 'Score: ' + score;
 
 }
 
@@ -421,7 +413,7 @@ function createHealthBars(){
     playerHealthBar.crop(new Phaser.Rectangle(0,0,healthBarWidth,healthBarHeight));
     enemyHealthBar = game.add.sprite(0, 0, 'healthBar');    /////////
     enemyHealthBar.crop(new Phaser.Rectangle(0,0,healthBarWidth,healthBarHeight));
-    APText = game.add.text(0, game.world.height-(healthBarHeight*2), 'AP: ' + AP, { fontSize: '32px',           fill: '#000' });
+    APText = game.add.text(0, game.world.height-(healthBarHeight*2), 'AP: ' + AP, { font: '32px VT323',           fill: '#000' });
 }
 
 
