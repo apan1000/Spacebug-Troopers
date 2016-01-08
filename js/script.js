@@ -1,23 +1,6 @@
 var game = new Phaser.Game(700, 700, Phaser.AUTO, '', { preload: preload, create: create, update: update });
 game.ScaleManager
 
-function preload() {
-    //Cessmap background. Each square is 100px.
-    game.load.image('chessmap', 'assets/chessmap.png');
-    game.load.image('star', 'assets/star.png');
-    //game.load.spritesheet('voxobot', 'assets/voxobot.png', 64, 96);
-    game.load.spritesheet('redsoldier', 'assets/redsoldier_spritesheet.png', 100, 100);
-    game.load.spritesheet('greensoldier', 'assets/greensoldier_spritesheet.png', 100, 100);
-    game.load.spritesheet('bluesoldier', 'assets/bluesoldier_spritesheet.png', 100, 100);
-    game.load.spritesheet('monster', 'assets/monster_spritesheet.png', 100, 100);
-    
-    // New preloads
-    game.load.image('healthBar', 'assets/health.png');
-    game.load.spritesheet('explosion', 'assets/explosion.png', 32,32);
-    game.load.audio('sfx', 'assets/SFX/Explosion.wav');
-    // New preloads
-}
-
 var language = 'en_US';
 
 var recognition = new webkitSpeechRecognition();
@@ -64,6 +47,24 @@ var SFX;
 // New variables
 
 
+function preload() {
+    //Cessmap background. Each square is 100px.
+    game.load.image('chessmap', 'assets/chessmap.png');
+    game.load.image('star', 'assets/star.png');
+    //game.load.spritesheet('voxobot', 'assets/voxobot.png', 64, 96);
+    game.load.spritesheet('redsoldier', 'assets/redsoldier_spritesheet.png', 100, 100);
+    game.load.spritesheet('greensoldier', 'assets/greensoldier_spritesheet.png', 100, 100);
+    game.load.spritesheet('bluesoldier', 'assets/bluesoldier_spritesheet.png', 100, 100);
+    game.load.spritesheet('monster', 'assets/monster_spritesheet.png', 100, 100);
+
+    // New preloads
+    game.load.image('healthBar', 'assets/health.png');
+    game.load.spritesheet('explosion', 'assets/explosion.png', 32,32);
+    game.load.audio('sfx', 'assets/SFX/Explosion.wav');
+    // New preloads
+}
+
+
 // Get frames for a row from a spritesheet.
 function row(number, col){
     if (col == 4) {
@@ -103,7 +104,7 @@ function create() {
     // New create stuff
     SFX = game.add.audio('sfx');
     SFX.allowMultiple = true;
-    
+
     // Definera knapptryck
     aKey = game.input.keyboard.addKey(Phaser.Keyboard.A);
     eKey = game.input.keyboard.addKey(Phaser.Keyboard.E);
@@ -113,11 +114,11 @@ function create() {
     game.add.sprite(0, 0, 'chessmap');
 
     createSoldiers();
-    createMonster();
+    createMonsters();
     // New create stuff
     createHealthBars();
     // New create stuff
-    
+
     //  Finally some stars to collect
     stars = game.add.group();
     stars.enableBody = true;
@@ -179,12 +180,12 @@ function update() {
             player = soldiers.iterate('key', 'redsoldier', Phaser.Group.RETURN_CHILD);
             speechInput = '';
             console.log("Chosen soldier: ", player.key);
-        } 
+        }
         if (speechInput.indexOf('green') > -1) {
             player = soldiers.iterate('key', 'greensoldier', Phaser.Group.RETURN_CHILD);
             speechInput = '';
             console.log("Chosen soldier: ", player.key);
-        } 
+        }
         if (speechInput.indexOf('blue') > -1) {
             player = soldiers.iterate('key', 'bluesoldier', Phaser.Group.RETURN_CHILD);
             speechInput = '';
@@ -195,14 +196,11 @@ function update() {
         if (speechInput.indexOf('left') > -1
             || cursors.left.isDown
             && !cursors.right.isDown) {
-            
+
             //Move left
             console.log("Moving player: ", player.key);
             walk(player, -100, 0, 'walk_left', 10);
             player.scale.setTo(1,1); //Mirror character
-
-            su.text = 'Okay, going left.';
-            speechSynthesis.speak(su);
 
             speechInput = '';
 
@@ -217,9 +215,6 @@ function update() {
             walk(player, 100, 0, 'walk_left', 10);
             player.scale.setTo(-1,1); //Unmirror character
 
-            su.text = 'Okay, going right.';
-            speechSynthesis.speak(su);
-
             speechInput = '';
 
             monsterAction();
@@ -232,9 +227,6 @@ function update() {
             console.log("Moving player: ", player.key);
             walk(player, 0, 100, 'walk_down', 10);
             player.scale.setTo(1,1); //Unmirror character
-
-            su.text = 'Okay, going down now if you don\'t mind.';
-            speechSynthesis.speak(su);
 
             speechInput = '';
 
@@ -249,15 +241,12 @@ function update() {
             walk(player, 0, -100, 'walk_up', 10);
             player.scale.setTo(1,1); //Unmirror character
 
-            su.text = 'Now I\'m going up, tra la la la';
-            speechSynthesis.speak(su);
-
             speechInput = '';
 
             monsterAction();
         }
-    } 
-    
+    }
+
     // New update functions
     aKey.onDown.add(attackEnemy, this);
     if (speechInput.indexOf('attack') > -1){
@@ -265,8 +254,8 @@ function update() {
     }
     eKey.onDown.add(createExplosion, this);
     // New update functions
-    
-    
+
+
 }
 
 function createSoldiers() {
@@ -292,21 +281,21 @@ function createSoldiers() {
     animationRunning = false;
 }
 
-function createMonster() {
+function createMonsters() {
 
     //Create monster group
     monsters = game.add.group();
     monsters.enableBody = true;
 
     //Add monsters to group
-    var p = 0;
+    var x = 0;
     for (var i = 0; i < 3; i++) {
-        var monster = monsters.create(250 + p, 50, 'monster');
+        var monster = monsters.create(250 + x, 50, 'monster');
         monster.anchor.setTo(.5, .5);
-        p = p + 100; 
+        x = x + 100;
     }
 
-    //Add anomations to group. Play animation continiously.
+    //Add animations to group. Play animation continously.
     monsters.callAll('animations.add', 'animations', 'walk_down', row(0, 3), 10, true);
     monsters.callAll('play', null, 'walk_down');
 }
@@ -314,7 +303,7 @@ function createMonster() {
 function walk (character, destinationX, destinationY, animation, animationVal) {
 
     console.log("Character: ", character.key);
-    
+
     //Calculate new position
     var newX = character.x + destinationX;
     var newY = character.y + destinationY;
@@ -348,10 +337,10 @@ function monsterAction () {
     playerYPos = player.position.y;
     var randomMon = monsters.getRandom();
     console.log(randomMon);
-    monsterXPos = randomMon.position.x; 
-    monsterYPos = randomMon.position.y; 
+    monsterXPos = randomMon.position.x;
+    monsterYPos = randomMon.position.y;
 
-    if (Math.abs(playerXPos - monsterXPos) < Math.abs(playerYPos - monsterYPos) 
+    if (Math.abs(playerXPos - monsterXPos) < Math.abs(playerYPos - monsterYPos)
         || Math.abs(playerXPos - monsterXPos) == Math.abs(playerYPos - monsterYPos)) {
         if (playerYPos > monsterYPos) {
             walk(randomMon, 0, 100, 'walk_down', 10);
@@ -380,58 +369,58 @@ function collectStar (player, star) {
     //  Add and update the score
     score += 10;
     scoreText.text = 'Score: ' + score;
-    
+
 }
-    
+
 // New Functions
-        
+
 function decreaseEnemyHealth(){
     enemyHealthBar.cropRect.width -= healthBarWidth*0.1;
     enemyHealthBar.updateCrop();
 }
-    
+
 function decreaseAP(){
     AP -= 1;
     APText.text = 'AP: ' + AP;
 }
-    
-    
+
+
 function attackEnemy(){
 
-    
+
     playerXPos = player.position.x;
     playerYPos = player.position.y;
 
     console.log(monster.position);
     walk(
-    player, 
+    player,
     monster.position.x-player.position.x,
     monster.position.y-player.position.y+monster.height,
     'walk_up',
     2);
-    
+
     //(character, destinationX, destinationY, animation, animationVal)
-    
+
     //player.scale.setTo(-1,1); //Mirror character
     animationRunning = true;
     tween.onComplete.addOnce(createExplosion, this);
-    tween.onComplete.addOnce(decreaseAP, this);     
+    tween.onComplete.addOnce(decreaseAP, this);
 
     tween.onComplete.addOnce(decreaseEnemyHealth, this);
     tween.onComplete.addOnce(stopWalking, this);
     tween.onComplete.addOnce(moveBack, this);
     player.animations.play('walk_up',20,true);
-  
+
 }
 
 function moveBack(){
     walk(
     player,
-    playerXPos- player.position.x, 
+    playerXPos- player.position.x,
     playerYPos- player.position.y,
     'walk_back',
     2);
-     
+
     animationRunning = true;
     tween.onComplete.addOnce(stopWalking, this);
     player.animations.play('walk_down',20,true);
@@ -448,7 +437,7 @@ function createExplosion(){
 
 function createHealthBars(){
     playerHealthBar = game.add.sprite(0, game.world.height-healthBarHeight, 'healthBar');   /////////
-    playerHealthBar.crop(new Phaser.Rectangle(0,0,healthBarWidth,healthBarHeight)); 
+    playerHealthBar.crop(new Phaser.Rectangle(0,0,healthBarWidth,healthBarHeight));
     enemyHealthBar = game.add.sprite(0, 0, 'healthBar');    /////////
     enemyHealthBar.crop(new Phaser.Rectangle(0,0,healthBarWidth,healthBarHeight));
     APText = game.add.text(0, game.world.height-(healthBarHeight*2), 'AP: ' + AP, { fontSize: '32px',           fill: '#000' });
@@ -459,7 +448,3 @@ function createHealthBars(){
 
 
 // New functions
-    
-    
-    
-    
