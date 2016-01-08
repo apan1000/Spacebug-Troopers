@@ -93,34 +93,25 @@ recognition.onresult = function(event) {
 
     // A simple function to check if a word has been heard.
     var match = '';
-    var contains = function(word){
-      var result = speechInput.indexOf(word) > -1;
-      if(result){ match = word;}
-      return speechInput.indexOf(word) > -1;
-    }
-
-
     if(animationRunning === false) {
 
         // SELECTION COMMANDS
-        if (contains('red')||contains('green')||contains('blue')) {
-            player = soldiers.iterate('key', match+'soldier', Phaser.Group.RETURN_CHILD);
-            selectedPlayerText.text = match;
-            selectedPlayerText.style.fill = match;
+        if (match  = speechInput.match('(red|green|blue)')) {
+            player = soldiers.iterate('key', match[0]+'soldier', Phaser.Group.RETURN_CHILD);
+            selectedPlayerText.text = match[0];
+            selectedPlayerText.style.fill = match[0];
         }
 
         // MOVEMENT COMMANDS
-        if (contains('up')
-        ||contains('left')
-        ||contains('left')
-        ||contains('right')) {
-            walk(player, match);
+        if (match = speechInput.match('(up|left|right|down)')) {
+          walk(player, match[0]);
+          monsterAction();
         }
 
     }
         // New update functions
         aKey.onDown.add(attackEnemy, this);
-        if (contains('attack')){
+        if (speechInput.indexOf('attack') > -1){
              attackEnemy();
         }
         eKey.onDown.add(createExplosion, this);
