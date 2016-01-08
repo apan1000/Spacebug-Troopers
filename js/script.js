@@ -92,27 +92,22 @@ recognition.onresult = function(event) {
     game.debug.text(speechInput, game.world.height/2-20, game.world.width/2-30, "#000000");
 
     // A simple function to check if a word has been heard.
-    var contains = function(word){return speechInput.indexOf(word) > -1;}
+    var match = '';
+    var contains = function(word){
+      var result = speechInput.indexOf(word) > -1;
+      if(result){ match = word;}
+      return speechInput.indexOf(word) > -1;
+    }
 
 
     if(animationRunning === false) {
 
         // SELECTION COMMANDS
-        if (contains('red')) {
-            player = soldiers.iterate('key', 'redsoldier', Phaser.Group.RETURN_CHILD);
-            selectedPlayerText.text = 'Selected: ' + 'red';
-            selectedPlayerText.style.fill = 'red'
+        if (contains('red')|contains('green')|contains('blue')) {
+            player = soldiers.iterate('key', match+'soldier', Phaser.Group.RETURN_CHILD);
+            selectedPlayerText.text = match;
+            selectedPlayerText.style.fill = match;
         }
-        if (contains('green')) {
-            player = soldiers.iterate('key', 'greensoldier', Phaser.Group.RETURN_CHILD);
-            selectedPlayerText.text = 'Selected: ' + 'green';
-        }
-        if (contains('blue')) {
-            player = soldiers.iterate('key', 'bluesoldier', Phaser.Group.RETURN_CHILD);
-            selectedPlayerText.text = 'Selected: ' + 'blue';
-        }
-
-
 
         // MOVEMENT COMMANDS
         if (contains('left')) {
@@ -141,7 +136,6 @@ recognition.onresult = function(event) {
         } else if (contains('up')) {
 
             //Move up
-            console.log("Moving player: ", player.key);
             walk(player, 0, -100, 'walk_up', 10);
             player.scale.setTo(1,1); //Unmirror character
 
