@@ -17,9 +17,6 @@ var game = new Phaser.Game(700, 700, Phaser.AUTO, '', { preload: preload, create
 game.ScaleManager
 
 var player;
-var redsoldier;
-var greensoldier;
-var bluesoldier;
 var monsters = [];
 var platforms;
 var cursors;
@@ -44,15 +41,21 @@ var playerYPos;
 var SFX;
 // New variables
 
+var colors = ['red', 'green', 'blue'];
+
 
 function preload() {
     //Cessmap background. Each square is 100px.
     game.load.image('chessmap', 'assets/chessmap.png');
-    game.load.image('star', 'assets/star.png');
-    //game.load.spritesheet('voxobot', 'assets/voxobot.png', 64, 96);
-    game.load.spritesheet('redsoldier', 'assets/redsoldier_spritesheet.png', 100, 100);
-    game.load.spritesheet('greensoldier', 'assets/greensoldier_spritesheet.png', 100, 100);
-    game.load.spritesheet('bluesoldier', 'assets/bluesoldier_spritesheet.png', 100, 100);
+
+    // Create soldiers
+    for(var color of colors){
+    game.load.spritesheet(
+      color+'soldier', //Name
+      'assets/'+color+'soldier_spritesheet.png', // Image file
+       100, 100); // The size of each frame
+    }
+
     game.load.spritesheet('monster', 'assets/monster_spritesheet.png', 100, 100);
 
     // New preloads
@@ -63,16 +66,8 @@ function preload() {
 }
 
 
-// Get frames for a row from a spritesheet.
-function row(number, col){
-    if (col == 4) {
-        var pos = number*4;
-        return [pos, 1+pos, 2+pos, 3+pos];
-    } else if (col == 3) {
-        var pos = number*3;
-        return [pos, 1+pos, 2+pos];
-    }
-}
+// Get frames numbers for a row from a spritesheet.
+function row(row, col){return _.range(col*row, col*row+col);}
 
 recognition.onresult = function(event) {
 
@@ -199,14 +194,10 @@ function createSoldiers() {
     soldiers.enableBody = true;
 
     //Add soldiers to group. Set anchor to middle so that character can be flipped without movement.
-    var greensoldier = soldiers.create(250, 650, 'greensoldier');
-    greensoldier.anchor.setTo(.5, .5);
-
-    var redsoldier = soldiers.create(350, 650, 'redsoldier');
-    redsoldier.anchor.setTo(.5, .5);
-
-    var bluesoldier = soldiers.create(450, 650, 'bluesoldier');
-    bluesoldier.anchor.setTo(.5, .5);
+    for (var i = 0; i < colors.length; i++) {
+      var soldier = soldiers.create(250 + i*100, 650, colors[i]+'soldier');
+      soldier.anchor.setTo(.5, .5);
+    }
 
     //Add animations to group
     soldiers.callAll('animations.add', 'animations', 'walk_down', row(0, 4), 10, true);
@@ -222,11 +213,9 @@ function createMonsters() {
     monsters.enableBody = true;
 
     //Add monsters to group
-    var x = 0;
     for (var i = 0; i < 3; i++) {
-        var monster = monsters.create(250 + x, 50, 'monster');
+        var monster = monsters.create(250 + i*100, 50, 'monster');
         monster.anchor.setTo(.5, .5);
-        x = x + 100;
     }
 
     //Add animations to group. Play animation continously.
@@ -267,7 +256,6 @@ function walk (character, direction) {
 }
 
 function stopWalking (character) {
-
     //Stop walking animations
     player.animations.stop('walk_left',true);
     player.animations.stop('walk_up',true);
