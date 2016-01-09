@@ -39,6 +39,8 @@ var explosion;
 var playerXPos;
 var playerYPos;
 var SFX;
+
+var SCALE = 1;
 // New variables
 
 var colors = ['red', 'green', 'blue'];
@@ -228,14 +230,14 @@ function walk (character, direction) {
     var x = 0;
     var y = 0;
 
-    character.scale.setTo(1,1); //Unmirror character
+    character.scale.setTo(SCALE,SCALE); //Unmirror character
 
     switch(direction){
         case 'up': y = -100; break;
         case 'down': y = 100; break;
         case 'left':x = -100; break;
         case 'right': x = 100;
-        character.scale.setTo(-1,1); //mirror character
+        character.scale.setTo(-SCALE,SCALE); //mirror character
         direction = 'left'; // Since mirrored, play left animation.
         break;
     }
@@ -278,16 +280,16 @@ function monsterAction () {
     if (Math.abs(playerXPos - monsterXPos) < Math.abs(playerYPos - monsterYPos)
         || Math.abs(playerXPos - monsterXPos) == Math.abs(playerYPos - monsterYPos)) {
         if (playerYPos > monsterYPos) {
-            walk(randomMon, 0, 100, 'walk_down', 10);
+            walk(randomMon, 'down');
         } else {
-            walk(randomMon, 0, -100, 'walk_up', 10);
+            walk(randomMon, 'up');
         }
     } else if (Math.abs(playerXPos - monsterXPos) > Math.abs(playerYPos - monsterYPos)
         || Math.abs(playerXPos - monsterXPos) == Math.abs(playerYPos - monsterYPos)) {
         if (playerXPos > monsterXPos) {
-            walk(randomMon, 100, 0, 'walk_right', 10);
+            walk(randomMon, 'right');
         } else {
-            walk(randomMon, -100, 0, 'walk_left', 10);
+            walk(randomMon, 'left');
         }
     }
 }
