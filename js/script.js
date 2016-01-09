@@ -194,6 +194,7 @@ function createSoldiers() {
     soldiers.enableBody = true;
 
     //Add soldiers to group. Set anchor to middle so that character can be flipped without movement.
+
     for (var i = 0; i < colors.length; i++) {
       var soldier = soldiers.create(250 + i*100, 650, colors[i]+'soldier');
       soldier.anchor.setTo(.5, .5);
@@ -227,13 +228,14 @@ function walk (character, direction) {
     var x = 0;
     var y = 0;
 
-    player.scale.setTo(1,1); //Unmirror character
+    character.scale.setTo(1,1); //Unmirror character
+
     switch(direction){
         case 'up': y = -100; break;
         case 'down': y = 100; break;
         case 'left':x = -100; break;
         case 'right': x = 100;
-        player.scale.setTo(-1,1); //mirror character
+        character.scale.setTo(-1,1); //mirror character
         direction = 'left'; // Since mirrored, play left animation.
         break;
     }
