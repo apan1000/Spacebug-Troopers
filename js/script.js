@@ -43,6 +43,8 @@ var SCALE = 1;
 // New variables
 
 var colors = ['red', 'green', 'blue'];
+var monsterColors = [0x404040, 0xf0f000, 0xf050a0]; // Used for tinting
+var monsterNames = ['black', 'yellow', 'orange'];
 
 
 function preload() {
@@ -96,9 +98,16 @@ recognition.onresult = function(event) {
         }
 
         // MOVEMENT COMMANDS
-        if (match = speechInput.match('(up|left|right|down)')) {
-          walk(player, match[0]);
-          monsterAction();
+        if ( speechInput.match('(move|walk)') ) {
+            if ( match = speechInput.match('(up|left|right|down)') ) {
+              walk(player, match[0]);
+              monsterAction();
+            } else if ( speechInput.match('(to)') ) {
+                if( match = speechInput.match('(black|yellow|orange)') ) {
+                    walkToward(player, match[0]);
+                    monsterAction();
+                }
+            }
         }
     }
 
@@ -213,6 +222,8 @@ function createMonsters() {
     for (var i = 0; i < 3; i++) {
         var monster = monsters.create(250 + i*100, 50, 'monster');
         monster.anchor.setTo(.5, .5);
+        monster.tint = monsterColors[i];
+        monster.name = monsterNames[i];
     }
 
     //Add animations to group. Play animation continously.
@@ -223,6 +234,7 @@ function createMonsters() {
 function walk (character, direction) {
     var x = 0;
     var y = 0;
+    var directionText = direction;
 
     character.scale.setTo(SCALE,SCALE); //Unmirror character
 
@@ -249,13 +261,43 @@ function walk (character, direction) {
         tween.onComplete.addOnce(stopWalking, this);
 
         if (character.key != "monster") {
-            document.getElementById('command-text').innerHTML = character.key+" is moving "+direction;
+            document.getElementById('command-text').innerHTML = character.key+" is moving "+directionText;
         }
     }
     else {
         stopWalking(character);
     }
 
+}
+
+function walkToward (character, targetColor) {
+    var characterXPos = character.position.x;
+    var characterYPos = character.position.y;
+
+    if(character.key == 'monster') {
+        var target = player;
+    } else {
+        var target = monsters.iterate('name', targetColor, Phaser.Group.RETURN_CHILD);
+    }
+
+    var targetXPos = target.position.x;
+    var targetYPos = target.position.y;
+
+    if (Math.abs(targetXPos - characterXPos) < Math.abs(targetYPos - characterYPos)
+        || Math.abs(targetXPos - characterXPos) == Math.abs(targetYPos - characterYPos)) {
+        if (targetYPos > characterYPos) {
+            walk(character, 'down');
+        } else {
+            walk(character, 'up');
+        }
+    } else if (Math.abs(targetXPos - characterXPos) > Math.abs(targetYPos - characterYPos)
+        || Math.abs(targetXPos - characterXPos) == Math.abs(targetYPos - characterYPos)) {
+        if (targetXPos > playerXPos) {
+            walk(character, 'right');
+        } else {
+            walk(character, 'left');
+        }
+    }
 }
 
 function stopWalking (character) {
@@ -277,21 +319,7 @@ function monsterAction () {
     monsterXPos = randomMon.position.x;
     monsterYPos = randomMon.position.y;
 
-    if (Math.abs(playerXPos - monsterXPos) < Math.abs(playerYPos - monsterYPos)
-        || Math.abs(playerXPos - monsterXPos) == Math.abs(playerYPos - monsterYPos)) {
-        if (playerYPos > monsterYPos) {
-            walk(randomMon, 'down');
-        } else {
-            walk(randomMon, 'up');
-        }
-    } else if (Math.abs(playerXPos - monsterXPos) > Math.abs(playerYPos - monsterYPos)
-        || Math.abs(playerXPos - monsterXPos) == Math.abs(playerYPos - monsterYPos)) {
-        if (playerXPos > monsterXPos) {
-            walk(randomMon, 'right');
-        } else {
-            walk(randomMon, 'left');
-        }
-    }
+    walkToward(randomMon, player);
 }
 
 
