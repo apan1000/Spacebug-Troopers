@@ -58,6 +58,27 @@ a {
   z-index: -1;
 }
 
+#commandModule {
+  width: 700px;
+  height: 100px;
+  position: relative;
+  background: black;
+  opacity: 0.7;
+  margin-right: auto;
+  margin-left: auto;
+  z-index: 9000;
+  padding: 10px;
+  font-family: "Press+Start+2P";
+  border: 2px solid #d9d9d9;
+}
+
+#command-text {
+  color: #1aff1a;
+  position: center;
+  font-size: 30pt;
+  font-family: "Press+Start+2P";
+}
+
 @keyframes animStar {
   0% {
     transform: translateY(0px);

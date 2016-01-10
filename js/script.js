@@ -8,7 +8,6 @@ recognition.lang = 'en_US';
 recognition.interimResults = true;
 recognition.onend = function() {recognition.start();}
 
-
 var speechInput = '';
 var final_transcript = '';
 
@@ -84,7 +83,8 @@ recognition.onresult = function(event) {
         }
     }
 
-    game.debug.text(speechInput, game.world.height/2-20, game.world.width/2-30, "#000000");
+    //game.debug.text(speechInput, 10, game.world.width/2-30, "#000000");
+    document.getElementById('command-text').innerHTML = speechInput;
 
     // A simple function to check if a word has been heard.
     var match = '';
@@ -247,6 +247,10 @@ function walk (character, direction) {
         console.log(character.key+' is moving')
         tween = this.game.add.tween(character).to({x:newX, y:newY}, 800, null, true);
         tween.onComplete.addOnce(stopWalking, this);
+
+        if (character.key != "monster") {
+            document.getElementById('command-text').innerHTML = character.key+" is moving "+direction;
+        }
     }
     else {
         stopWalking(character);
@@ -262,6 +266,7 @@ function stopWalking (character) {
     animationRunning = false;
     character.frame = 0;
     console.log(character.key+' is idle');
+    document.getElementById('command-text').innerHTML = "Awaiting command...";
 }
 
 function monsterAction () {
@@ -288,6 +293,7 @@ function monsterAction () {
         }
     }
 }
+
 
 function selectPlayer(color){
   player = soldiers.iterate('key', color+'soldier', Phaser.Group.RETURN_CHILD);
