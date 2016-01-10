@@ -131,7 +131,7 @@ function create() {
     // The text that counts the amount of moves
     game.add.text(10, 35, 'Score:', { font: '20px "Press Start 2P"', fill: '#000' });
 
-    scoreText = game.add.text(140, 35, '0', { font: '20px "Press Start 2P"', fill: '#FFF'});
+    scoreText = game.add.text(140, 35, score, { font: '20px "Press Start 2P"', fill: '#FFF'});
 
     // Start speech recognition
     recognition.start();
@@ -159,6 +159,7 @@ function configureKeys() {
         if (!animationRunning) {
           walk(player, direction);
           monsterAction();
+          updateScore();
         }
       }
 
@@ -301,6 +302,11 @@ function createExplosion(){
     explosion.animations.add('boom');
     explosion.play('boom', 20, false, true);
     SFX.play();
+}
+
+function updateScore(){
+  score++;
+  scoreText.text = score;
 }
 
 function createHealthBars(){
