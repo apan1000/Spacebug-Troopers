@@ -60,23 +60,24 @@ a {
 
 #commandModule {
   width: 700px;
-  height: 100px;
+  height: 50px;
   position: relative;
-  background: black;
+  background: #400;
   opacity: 0.7;
   margin-right: auto;
   margin-left: auto;
   z-index: 9000;
-  padding: 10px;
-  font-family: "Press+Start+2P";
-  border: 2px solid #d9d9d9;
+  padding: 0px;
+  font-family: "Press Start 2P";
+  border: 3px solid #ccc;
+  overflow: hidden;
 }
 
 #command-text {
   color: #1aff1a;
   position: center;
-  font-size: 30pt;
-  font-family: "Press+Start+2P";
+  font-size: 20pt;
+  font-family: "Press Start 2P";
 }
 
 @keyframes animStar {
