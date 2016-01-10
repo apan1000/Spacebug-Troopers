@@ -87,24 +87,24 @@ recognition.onresult = function(event) {
     game.debug.text(speechInput, game.world.height/2-20, game.world.width/2-30, "#000000");
     document.getElementById('command-text').innerHTML = speechInput;
 
-    // A simple function to check if a word has been heard.
     var match = '';
-    if(animationRunning === false) {
+    if(animationRunning) return; // Do nothing if an animation is still going
 
-        // SELECTION COMMANDS
-        if ( match  = speechInput.match('(red|green|blue)') ) {
-          selectPlayer(match[0])
-        }
 
-        // MOVEMENT COMMANDS
-        if ( match = speechInput.match('(up|left|right|down)') ) {
-          walk(player, match[0]);
-          monsterAction();
-        } else if ( match = speechInput.match('(black|yellow|orange)') ) {
-            walkToward(player, match[0]);
-            monsterAction();
-        }
+    // SELECTION COMMANDS
+    if ( match  = speechInput.match('(red|green|blue)') ) {
+      selectPlayer(match[0])
     }
+
+    // MOVEMENT COMMANDS
+    if ( match = speechInput.match('(up|left|right|down)') ) {
+      walk(player, match[0]);
+      monsterAction();
+    } else if ( match = speechInput.match('(black|yellow|orange)') ) {
+        walkToward(player, match[0]);
+        monsterAction();
+    }
+
 
 }
 
@@ -121,8 +121,8 @@ function create() {
     //  Create our controls.
     configureKeys();
 
-    createSoldiers();
     createMonsters();
+    createSoldiers();
 
     //  The select text
     game.add.text(10, 5, 'Selected:', { font: '20px "Press Start 2P"', fill: '#000' });
@@ -178,11 +178,10 @@ function configureKeys() {
 }
 
 function playerWalk(direction){
-  if (!animationRunning) {
-    walk(player, direction);
-    monsterAction();
-    updateScore();
-  }
+  if(animationRunning) return; // Do nothing if an animation is still going
+  walk(player, direction);
+  monsterAction();
+  updateScore();
 }
 
 function createSoldiers() {
@@ -255,9 +254,16 @@ function walk (character, direction) {
         tween = this.game.add.tween(character).to({x:newX, y:newY}, 800, null, true);
         tween.onComplete.addOnce(stopWalking, this);
     }
-    else {
-        stopWalking(character);
-    }
+}
+
+function stopWalking (character) {
+    //Stop walking animations
+    animationRunning = false;
+    player.animations.stop('walk_left',true);
+    player.animations.stop('walk_up',true);
+    player.animations.stop('walk_down',true);
+    character.frame = 0;
+    console.log(character.key+' is idle');
 }
 
 function walkToward (character, targetColor) {
@@ -288,15 +294,7 @@ function walkToward (character, targetColor) {
     }
 }
 
-function stopWalking (character) {
-    //Stop walking animations
-    player.animations.stop('walk_left',true);
-    player.animations.stop('walk_up',true);
-    player.animations.stop('walk_down',true);
-    animationRunning = false;
-    character.frame = 0;
-    console.log(character.key+' is idle');
-}
+
 
 function monsterAction () {
     playerXPos = player.position.x;
@@ -310,6 +308,7 @@ function monsterAction () {
 }
 
 function selectPlayer(color){
+  if(animationRunning) return; // Do nothing if an animation is still going
   player = soldiers.iterate('key', color+'soldier', Phaser.Group.RETURN_CHILD);
   selectedPlayerText.text = color;
   selectedPlayerText.style.fill = color;
@@ -339,10 +338,10 @@ function createHealthBars(){
 }
 
 function reset(){
-  soldiers.destroy();
   monsters.destroy();
-  createSoldiers();
+  soldiers.destroy();
   createMonsters();
+  createSoldiers();
 
   animationRunning = false;
 
