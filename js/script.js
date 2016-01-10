@@ -35,7 +35,7 @@ var playerXPos;
 var playerYPos;
 var SFX;
 
-var SCALE = 3.57;
+var SCALE = 3;
 // New variables
 
 var colors = ['red', 'green', 'blue'];
@@ -124,10 +124,6 @@ function create() {
     createSoldiers();
     createMonsters();
 
-    //  Finally some stars to collect
-    stars = game.add.group();
-    stars.enableBody = true;
-
     //  The select text
     game.add.text(10, 5, 'Selected:', { font: '20px "Press Start 2P"', fill: '#000' });
     selectedPlayerText = game.add.text(200, 5, 'red', { font: '20px "Press Start 2P"'});
@@ -155,6 +151,7 @@ function configureKeys() {
       var key_A = game.input.keyboard.addKey(Phaser.Keyboard.A);
       var key_S = game.input.keyboard.addKey(Phaser.Keyboard.S);
       var key_D = game.input.keyboard.addKey(Phaser.Keyboard.D);
+      var key_ESC = game.input.keyboard.addKey(Phaser.Keyboard.ESC);
       var cursors = game.input.keyboard.createCursorKeys();
 
       qKey = game.input.keyboard.addKey(Phaser.Keyboard.Q);
@@ -174,6 +171,9 @@ function configureKeys() {
       cursors.left.onDown.add(function(){playerWalk('left')}, this );
       cursors.down.onDown.add(function(){playerWalk('down')}, this );
       cursors.right.onDown.add(function(){playerWalk('right')}, this );
+
+      // reset key
+      key_ESC.onDown.add(reset, this);
 
 }
 
@@ -338,7 +338,18 @@ function createHealthBars(){
     APText = game.add.text(10, game.world.height-(healthBarHeight*2), 'AP: ' + AP, { font: '20px "Press Start 2P"',           fill: '#000' });
 }
 
+function reset(){
+  soldiers.destroy();
+  monsters.destroy();
+  createSoldiers();
+  createMonsters();
 
+  animationRunning = false;
+
+  score = 0
+  scoreText.text = score;
+  selectPlayer('red');
+}
 
 
 
