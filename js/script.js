@@ -84,29 +84,28 @@ recognition.onresult = function(event) {
         }
     }
 
-    game.debug.text(speechInput, game.world.height/2-20, game.world.width/2-30, "#000000");
+    document.getElementById('command-text').innerHTML = speechInput;
+    // game.debug.text(speechInput, game.world.height/2-20, game.world.width/2-30, "#000000");
 
     // A simple function to check if a word has been heard.
     var match = '';
     if(animationRunning === false) {
 
         // SELECTION COMMANDS
-        if (match  = speechInput.match('(red|green|blue)')) {
+        if ( match  = speechInput.match('(red|green|blue)') ) {
           selectPlayer(match[0])
         }
 
         // MOVEMENT COMMANDS
-        if ( speechInput.match('(move|walk)') ) {
+        // if ( speechInput.match('(move|walk)') ) {
             if ( match = speechInput.match('(up|left|right|down)') ) {
               walk(player, match[0]);
               monsterAction();
-            } else if ( speechInput.match('(to)') ) {
-                if( match = speechInput.match('(black|yellow|orange)') ) {
-                    walkToward(player, match[0]);
-                    monsterAction();
-                }
+            } else if ( match = speechInput.match('(black|yellow|orange)') ) {
+                walkToward(player, match[0]);
+                monsterAction();
             }
-        }
+        // }
     }
 
 }
@@ -282,15 +281,13 @@ function walkToward (character, targetColor) {
     var targetXPos = target.position.x;
     var targetYPos = target.position.y;
 
-    if (Math.abs(targetXPos - characterXPos) < Math.abs(targetYPos - characterYPos)
-        || Math.abs(targetXPos - characterXPos) == Math.abs(targetYPos - characterYPos)) {
+    if ( Math.abs(targetXPos - characterXPos) <= Math.abs(targetYPos - characterYPos) ) {
         if (targetYPos > characterYPos) {
             walk(character, 'down');
         } else {
             walk(character, 'up');
         }
-    } else if (Math.abs(targetXPos - characterXPos) > Math.abs(targetYPos - characterYPos)
-        || Math.abs(targetXPos - characterXPos) == Math.abs(targetYPos - characterYPos)) {
+    } else if ( Math.abs(targetXPos - characterXPos) > Math.abs(targetYPos - characterYPos) ) {
         if (targetXPos > playerXPos) {
             walk(character, 'right');
         } else {
