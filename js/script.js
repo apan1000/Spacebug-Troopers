@@ -8,11 +8,12 @@ recognition.lang = 'en_US';
 recognition.interimResults = true;
 recognition.onend = function() {recognition.start();}
 
+
 var speechInput = '';
 var final_transcript = '';
 
 // GAME VARIABLES
-var game = new Phaser.Game(700, 700, Phaser.AUTO, '', { preload: preload, create: create, update: update });
+var game = new Phaser.Game(700, 700, Phaser.CANVAS, '', { preload: preload, create: create, update: update });
 game.ScaleManager
 
 var player;
@@ -24,28 +25,26 @@ var animationRunning = false;
 var stars;
 var score = 0;
 var selectedPlayerText;
+var selectedPlayerText;
 
 
 // New variables
-var playerHealth;
-var enemyHealth;
-var healthBarWidth = 300;
-var healthBarHeight = 30;
-var AP = 10;
-var APText;
 var qKey;
 var explosion;
 var playerXPos;
 var playerYPos;
 var SFX;
 
-var SCALE = 1;
+var SCALE = 3;
 // New variables
 
 var colors = ['red', 'green', 'blue'];
 
 
 function preload() {
+
+    // Disable smoothing
+    game.stage.smoothed = false;
     //Cessmap background. Each square is 100px.
     game.load.image('chessmap', 'assets/chessmap.png');
 
@@ -83,8 +82,7 @@ recognition.onresult = function(event) {
         }
     }
 
-    //game.debug.text(speechInput, 10, game.world.width/2-30, "#000000");
-    document.getElementById('command-text').innerHTML = speechInput;
+    game.debug.text(speechInput, game.world.height/2-20, game.world.width/2-30, "#000000");
 
     // A simple function to check if a word has been heard.
     var match = '';
@@ -120,30 +118,28 @@ function create() {
     createSoldiers();
     createMonsters();
 
-    createHealthBars();
-
     //  Finally some stars to collect
     stars = game.add.group();
     stars.enableBody = true;
 
     //  The select text
-    game.add.text(10, 30, 'Selected:', { font: '20px "Press Start 2P"', fill: '#000' });
-    selectedPlayerText = game.add.text(200, 30, 'red', { font: '20px "Press Start 2P"'});
+    game.add.text(10, 5, 'Selected:', { font: '20px "Press Start 2P"', fill: '#000' });
+    selectedPlayerText = game.add.text(200, 5, 'red', { font: '20px "Press Start 2P"'});
+    // Set default selected player
     selectPlayer('red')
+
+    // The text that counts the amount of moves
+    game.add.text(10, 35, 'Score:', { font: '20px "Press Start 2P"', fill: '#000' });
+
+    scoreText = game.add.text(140, 35, '0', { font: '20px "Press Start 2P"', fill: '#FFF'});
 
     // Start speech recognition
     recognition.start();
 }
 
-function update() { // Empty right now but should contain buttons
-        // New update functions
-        qKey.onDown.add(attackEnemy, this);
-        if (speechInput.indexOf('attack') > -1){
-            attackEnemy();
-        }
-        eKey.onDown.add(createExplosion, this);
-        // New update functions
-  }
+function update() {
+  // Empty right now
+}
 function configureKeys() {
       // Define keys
       var key_ONE = game.input.keyboard.addKey(Phaser.Keyboard.ONE);
@@ -194,6 +190,7 @@ function createSoldiers() {
     for (var i = 0; i < colors.length; i++) {
       var soldier = soldiers.create(250 + i*100, 650, colors[i]+'soldier');
       soldier.anchor.setTo(.5, .5);
+      soldier.scale.setTo(SCALE);
     }
 
     //Add animations to group
@@ -211,8 +208,9 @@ function createMonsters() {
 
     //Add monsters to group
     for (var i = 0; i < 3; i++) {
-        var monster = monsters.create(250 + i*100, 50, 'monster');
+        var monster = monsters.create(250 + i*100, 350, 'monster');
         monster.anchor.setTo(.5, .5);
+        monster.scale.setTo(SCALE);
     }
 
     //Add animations to group. Play animation continously.
@@ -247,15 +245,11 @@ function walk (character, direction) {
         console.log(character.key+' is moving')
         tween = this.game.add.tween(character).to({x:newX, y:newY}, 800, null, true);
         tween.onComplete.addOnce(stopWalking, this);
-
-        if (character.key != "monster") {
-            document.getElementById('command-text').innerHTML = character.key+" is moving "+direction;
-        }
     }
     else {
         stopWalking(character);
     }
-
+    createExplosion();
 }
 
 function stopWalking (character) {
@@ -266,7 +260,6 @@ function stopWalking (character) {
     animationRunning = false;
     character.frame = 0;
     console.log(character.key+' is idle');
-    document.getElementById('command-text').innerHTML = "Awaiting command...";
 }
 
 function monsterAction () {
@@ -294,7 +287,6 @@ function monsterAction () {
     }
 }
 
-
 function selectPlayer(color){
   player = soldiers.iterate('key', color+'soldier', Phaser.Group.RETURN_CHILD);
   selectedPlayerText.text = color;
@@ -303,64 +295,11 @@ function selectPlayer(color){
 
 // New Functions
 
-function decreaseEnemyHealth(){
-    enemyHealthBar.cropRect.width -= healthBarWidth*0.1;
-    enemyHealthBar.updateCrop();
-}
-
-function decreaseAP(){
-    AP -= 1;
-    APText.text = 'AP: ' + AP;
-}
-
-
-function attackEnemy(){
-
-
-    playerXPos = player.position.x;
-    playerYPos = player.position.y;
-
-    console.log(monster.position);
-    walk(
-    player,
-    monster.position.x-player.position.x,
-    monster.position.y-player.position.y+monster.height,
-    'walk_up',
-    2);
-
-    //(character, destinationX, destinationY, animation, animationVal)
-
-    //player.scale.setTo(-1,1); //Mirror character
-    animationRunning = true;
-    tween.onComplete.addOnce(createExplosion, this);
-    tween.onComplete.addOnce(decreaseAP, this);
-
-    tween.onComplete.addOnce(decreaseEnemyHealth, this);
-    tween.onComplete.addOnce(stopWalking, this);
-    tween.onComplete.addOnce(moveBack, this);
-    player.animations.play('walk_up',20,true);
-
-}
-
-function moveBack(){
-    walk(
-    player,
-    playerXPos- player.position.x,
-    playerYPos- player.position.y,
-    'walk_back',
-    2);
-
-    animationRunning = true;
-    tween.onComplete.addOnce(stopWalking, this);
-    player.animations.play('walk_down',20,true);
-
-}
-
 function createExplosion(){
-    var explosion = this.add.sprite(monster.x, monster.y, 'explosion');
-    explosion.anchor.setTo(0.5, 0.5);
+    var explosion = game.add.sprite(104, 104, 'explosion');
+    explosion.scale.setTo(SCALE);
     explosion.animations.add('boom');
-    explosion.play('boom', 15, false, true);
+    explosion.play('boom', 20, false, true);
     SFX.play();
 }
 
