@@ -82,9 +82,7 @@ recognition.onresult = function(event) {
         } else {
             speechInput += event.results[i][0].transcript.toLowerCase();
         }
-
     }
-
 
     game.debug.text(speechInput, game.world.height/2-20, game.world.width/2-30, "#000000");
 
@@ -104,7 +102,6 @@ recognition.onresult = function(event) {
           walk(player, match[0]);
           monsterAction();
         }
-
     }
         // // New update functions
         // aKey.onDown.add(attackEnemy, this);
@@ -187,27 +184,30 @@ function create() {
 }
 
 function update() { // Empty right now but should contain buttons
-  if (cursors.left.isDown) {
-    walk(player, 'left');
-    monsterAction();
-  } else if (cursors.right.isDown) {
-    walk(player, 'right');
-    monsterAction();
-  } else if (cursors.down.isDown) {
-    walk(player, 'down');
-    monsterAction();
-  } else if (cursors.up.isDown) {
-    walk(player, 'up');
-    monsterAction();
-  }
 
-  // New update functions
-  aKey.onDown.add(attackEnemy, this);
-  if (speechInput.indexOf('attack') > -1){
-    attackEnemy();
-  }
-  eKey.onDown.add(createExplosion, this);
-  // New update functions
+    if(animationRunning === false) {
+        if (cursors.left.isDown) {
+            walk(player, 'left');
+            monsterAction();
+        } else if (cursors.right.isDown) {
+            walk(player, 'right');
+            monsterAction();
+        } else if (cursors.down.isDown) {
+            walk(player, 'down');
+            monsterAction();
+        } else if (cursors.up.isDown) {
+            walk(player, 'up');
+            monsterAction();
+        }
+
+        // New update functions
+        aKey.onDown.add(attackEnemy, this);
+        if (speechInput.indexOf('attack') > -1){
+            attackEnemy();
+        }
+        eKey.onDown.add(createExplosion, this);
+        // New update functions
+    }
 }
 
 function createSoldiers() {
