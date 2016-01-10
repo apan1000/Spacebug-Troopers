@@ -9,9 +9,6 @@ recognition.interimResults = true;
 recognition.onend = function() {recognition.start();}
 
 
-var speechInput = '';
-var final_transcript = '';
-
 // GAME VARIABLES
 var game = new Phaser.Game(700, 700, Phaser.CANVAS, '', { preload: preload, create: create, update: update });
 game.ScaleManager
