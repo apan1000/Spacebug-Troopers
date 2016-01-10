@@ -35,7 +35,7 @@ var playerXPos;
 var playerYPos;
 var SFX;
 
-var SCALE = 3;
+var SCALE = 1;
 // New variables
 
 var colors = ['red', 'green', 'blue'];
@@ -84,8 +84,8 @@ recognition.onresult = function(event) {
         }
     }
 
+    game.debug.text(speechInput, game.world.height/2-20, game.world.width/2-30, "#000000");
     document.getElementById('command-text').innerHTML = speechInput;
-    // game.debug.text(speechInput, game.world.height/2-20, game.world.width/2-30, "#000000");
 
     // A simple function to check if a word has been heard.
     var match = '';
@@ -97,15 +97,13 @@ recognition.onresult = function(event) {
         }
 
         // MOVEMENT COMMANDS
-        // if ( speechInput.match('(move|walk)') ) {
-            if ( match = speechInput.match('(up|left|right|down)') ) {
-              walk(player, match[0]);
-              monsterAction();
-            } else if ( match = speechInput.match('(black|yellow|orange)') ) {
-                walkToward(player, match[0]);
-                monsterAction();
-            }
-        // }
+        if ( match = speechInput.match('(up|left|right|down)') ) {
+          walk(player, match[0]);
+          monsterAction();
+        } else if ( match = speechInput.match('(black|yellow|orange)') ) {
+            walkToward(player, match[0]);
+            monsterAction();
+        }
     }
 
 }
@@ -162,15 +160,6 @@ function configureKeys() {
       qKey = game.input.keyboard.addKey(Phaser.Keyboard.Q);
       eKey = game.input.keyboard.addKey(Phaser.Keyboard.E);
 
-      // Walking function
-      var playerWalk= function(direction){
-        if (!animationRunning) {
-          walk(player, direction);
-          monsterAction();
-          updateScore();
-        }
-      }
-
       // Add callbacks to keys
       // selection keys
       key_ONE.onDown.add(function(){selectPlayer('red')}, this );
@@ -186,6 +175,14 @@ function configureKeys() {
       cursors.down.onDown.add(function(){playerWalk('down')}, this );
       cursors.right.onDown.add(function(){playerWalk('right')}, this );
 
+}
+
+function playerWalk(direction){
+  if (!animationRunning) {
+    walk(player, direction);
+    monsterAction();
+    updateScore();
+  }
 }
 
 function createSoldiers() {
@@ -257,15 +254,10 @@ function walk (character, direction) {
         console.log(character.key+' is moving')
         tween = this.game.add.tween(character).to({x:newX, y:newY}, 800, null, true);
         tween.onComplete.addOnce(stopWalking, this);
-
-        if (character.key != "monster") {
-            document.getElementById('command-text').innerHTML = character.key+" is moving "+directionText;
-        }
     }
     else {
         stopWalking(character);
     }
-    createExplosion();
 }
 
 function walkToward (character, targetColor) {
