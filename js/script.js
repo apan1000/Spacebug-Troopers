@@ -34,7 +34,7 @@ var healthBarWidth = 300;
 var healthBarHeight = 30;
 var AP = 10;
 var APText;
-var aKey;
+var qKey;
 var explosion;
 var playerXPos;
 var playerYPos;
@@ -120,9 +120,18 @@ function create() {
     SFX.allowMultiple = true;
 
     // Define keys
-    aKey = game.input.keyboard.addKey(Phaser.Keyboard.A);
+    var wKey = game.input.keyboard.addKey(Phaser.Keyboard.W);
+    var aKey = game.input.keyboard.addKey(Phaser.Keyboard.A);
+    var sKey = game.input.keyboard.addKey(Phaser.Keyboard.S);
+    var dKey = game.input.keyboard.addKey(Phaser.Keyboard.D);
+
+    qKey = game.input.keyboard.addKey(Phaser.Keyboard.Q);
     eKey = game.input.keyboard.addKey(Phaser.Keyboard.E);
-    // New create stuff
+    // Add callbacks to keys
+    wKey.onDown.add(function(){walk(player,  'up')}, this );
+    aKey.onDown.add(function(){walk(player,  'left')}, this );
+    sKey.onDown.add(function(){walk(player,  'down')}, this );
+    dKey.onDown.add(function(){walk(player,  'right')}, this );
 
     //  A simple background for our game
     game.add.sprite(0, 0, 'chessmap');
@@ -201,7 +210,7 @@ function update() { // Empty right now but should contain buttons
         }
 
         // New update functions
-        aKey.onDown.add(attackEnemy, this);
+        qKey.onDown.add(attackEnemy, this);
         if (speechInput.indexOf('attack') > -1){
             attackEnemy();
         }
