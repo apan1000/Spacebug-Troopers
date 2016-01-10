@@ -103,13 +103,6 @@ recognition.onresult = function(event) {
           monsterAction();
         }
     }
-        // // New update functions
-        // aKey.onDown.add(attackEnemy, this);
-        // if (speechInput.indexOf('attack') > -1){
-        //      attackEnemy();
-        // }
-        // eKey.onDown.add(createExplosion, this);
-        // // New update functions
 
 }
 
@@ -119,96 +112,31 @@ function create() {
     SFX = game.add.audio('sfx');
     SFX.allowMultiple = true;
 
-    // Define keys
-    var wKey = game.input.keyboard.addKey(Phaser.Keyboard.W);
-    var aKey = game.input.keyboard.addKey(Phaser.Keyboard.A);
-    var sKey = game.input.keyboard.addKey(Phaser.Keyboard.S);
-    var dKey = game.input.keyboard.addKey(Phaser.Keyboard.D);
-
-    qKey = game.input.keyboard.addKey(Phaser.Keyboard.Q);
-    eKey = game.input.keyboard.addKey(Phaser.Keyboard.E);
-    // Add callbacks to keys
-    wKey.onDown.add(function(){walk(player,  'up')}, this );
-    aKey.onDown.add(function(){walk(player,  'left')}, this );
-    sKey.onDown.add(function(){walk(player,  'down')}, this );
-    dKey.onDown.add(function(){walk(player,  'right')}, this );
 
     //  A simple background for our game
     game.add.sprite(0, 0, 'chessmap');
 
+    //  Create our controls.
+    configureKeys();
+
     createSoldiers();
     createMonsters();
-    // New create stuff
+
     createHealthBars();
-    // New create stuff
 
     //  Finally some stars to collect
     stars = game.add.group();
     stars.enableBody = true;
 
-    //  Here we'll create some stars and place them at random squares across the board
-    // oddNumbers = [1,3,5,7,9,11,13];
-    // for (var i = 0; i < 5; i++)
-    // {
-    //     randOddX = oddNumbers[Math.floor(Math.random()*6)];
-    //     randOddY = oddNumbers[Math.floor(Math.random()*6)];
-    //     randPlaceX = Math.floor((Math.random() * randOddX) + 1) * 50;
-    //     randPlaceY = Math.floor((Math.random() * randOddY) + 1) * 50;
-    //     console.log(randPlaceX);
-    //     console.log(randPlaceY);
-    //     //  Create a star inside of the 'stars' group
-    //     var star = stars.create(randPlaceX, randPlaceY, 'star');
-    //     i = i+1;
-    // }
-
     //  The score
     game.add.text(16, 30, 'Selected:', { font: '32px VT323', fill: '#000' });
     selectedPlayerText = game.add.text(150, 30, 'NONE', { font: 'bold 32px VT323', fill: '#FFF' });
-
-    //  Our controls.
-    cursors = game.input.keyboard.createCursorKeys();
-
-    // // Button
-    // var graphics = game.add.graphics(698, -250);
-    // // set a fill and line style
-    // graphics.beginFill(0xff6cff);
-    // graphics.lineStyle(2, 0x77ffcc, 1);
-    // // draw a rectangle
-    // graphics.drawRect(0, 250, 100, 25);
-    // graphics.endFill();
-    // buttonText = game.add.text(704, 2, 'step. walk', { fontSize: '16px', fill: '#000' });
-    // // input
-    // graphics.inputEnabled = true;
-    // graphics.input.useHandCursor = true;
-    // graphics.events.onInputDown.add(function () {
-    //     if(SOMETHING) {
-    //         buttonText.setText('SOMETHING');
-    //     } else {
-    //         buttonText.setText('SOMETHING ELSE');
-    //     }
-    // }, this);
 
     // Start speech recognition
     recognition.start();
 }
 
 function update() { // Empty right now but should contain buttons
-
-    if(animationRunning === false) {
-        if (cursors.left.isDown) {
-            walk(player, 'left');
-            monsterAction();
-        } else if (cursors.right.isDown) {
-            walk(player, 'right');
-            monsterAction();
-        } else if (cursors.down.isDown) {
-            walk(player, 'down');
-            monsterAction();
-        } else if (cursors.up.isDown) {
-            walk(player, 'up');
-            monsterAction();
-        }
-
         // New update functions
         qKey.onDown.add(attackEnemy, this);
         if (speechInput.indexOf('attack') > -1){
@@ -216,7 +144,39 @@ function update() { // Empty right now but should contain buttons
         }
         eKey.onDown.add(createExplosion, this);
         // New update functions
-    }
+  }
+function configureKeys() {
+      // Define keys
+      var key_ONE = game.input.keyboard.addKey(Phaser.Keyboard.ONE);
+      var key_TWO = game.input.keyboard.addKey(Phaser.Keyboard.TWO);
+      var key_THREE = game.input.keyboard.addKey(Phaser.Keyboard.THREE);
+      var key_W = game.input.keyboard.addKey(Phaser.Keyboard.W);
+      var key_A = game.input.keyboard.addKey(Phaser.Keyboard.A);
+      var key_S = game.input.keyboard.addKey(Phaser.Keyboard.S);
+      var key_D = game.input.keyboard.addKey(Phaser.Keyboard.D);
+      var cursors = game.input.keyboard.createCursorKeys();
+
+      qKey = game.input.keyboard.addKey(Phaser.Keyboard.Q);
+      eKey = game.input.keyboard.addKey(Phaser.Keyboard.E);
+
+      // Walking function
+      var playerWalk= function(direction){
+        if (!animationRunning) {
+          walk(player, direction);
+          monsterAction();
+        }
+      }
+
+      // Add callbacks to keys
+      key_W.onDown.add(function(){playerWalk('up')}, this );
+      key_A.onDown.add(function(){playerWalk('left')}, this );
+      key_S.onDown.add(function(){playerWalk('down')}, this );
+      key_D.onDown.add(function(){playerWalk('right')}, this );
+      cursors.up.onDown.add(function(){playerWalk('up')}, this );
+      cursors.left.onDown.add(function(){playerWalk('left')}, this );
+      cursors.down.onDown.add(function(){playerWalk('down')}, this );
+      cursors.right.onDown.add(function(){playerWalk('right')}, this );
+
 }
 
 function createSoldiers() {
