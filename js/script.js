@@ -92,17 +92,18 @@ recognition.onresult = function(event) {
     if(animationRunning === false) {
 
         // SELECTION COMMANDS
-        if (match  = speechInput.match('(red|green|blue)')) {
+        if ( match  = speechInput.match('(red|green|blue)') ) {
           selectPlayer(match[0])
         }
 
         // MOVEMENT COMMANDS
         if ( match = speechInput.match('(up|left|right|down)') ) {
-          playerWalk(match[0]);
+          walk(player, match[0]);
           monsterAction();
+        } else if ( match = speechInput.match('(black|yellow|orange)') ) {
+            walkToward(player, match[0]);
+            monsterAction();
         }
-
-
     }
 
 }
@@ -272,15 +273,13 @@ function walkToward (character, targetColor) {
     var targetXPos = target.position.x;
     var targetYPos = target.position.y;
 
-    if (Math.abs(targetXPos - characterXPos) < Math.abs(targetYPos - characterYPos)
-        || Math.abs(targetXPos - characterXPos) == Math.abs(targetYPos - characterYPos)) {
+    if ( Math.abs(targetXPos - characterXPos) <= Math.abs(targetYPos - characterYPos) ) {
         if (targetYPos > characterYPos) {
             walk(character, 'down');
         } else {
             walk(character, 'up');
         }
-    } else if (Math.abs(targetXPos - characterXPos) > Math.abs(targetYPos - characterYPos)
-        || Math.abs(targetXPos - characterXPos) == Math.abs(targetYPos - characterYPos)) {
+    } else if ( Math.abs(targetXPos - characterXPos) > Math.abs(targetYPos - characterYPos) ) {
         if (targetXPos > playerXPos) {
             walk(character, 'right');
         } else {
