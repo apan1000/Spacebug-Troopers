@@ -35,7 +35,7 @@ var playerXPos;
 var playerYPos;
 var SFX;
 
-var SCALE = 1;
+var SCALE = 3.57;
 // New variables
 
 var colors = ['red', 'green', 'blue'];
@@ -54,11 +54,11 @@ function preload() {
     for(var color of colors){
     game.load.spritesheet(
       color+'soldier', //Name
-      'assets/'+color+'soldier_spritesheet.png', // Image file
-       100, 100); // The size of each frame
+      'assets/'+color+'soldier_spritesheet_ORG.png', // Image file
+       28, 28); // The size of each frame
     }
 
-    game.load.spritesheet('monster', 'assets/monster_spritesheet.png', 100, 100);
+    game.load.spritesheet('monster', 'assets/monster_ORG.png', 28, 28);
 
     // New preloads
     game.load.image('healthBar', 'assets/health.png');
