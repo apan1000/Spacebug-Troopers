@@ -283,7 +283,7 @@ function walkToward (character, targetColor) {
             walk(character, 'up');
         }
     } else if ( Math.abs(targetXPos - characterXPos) > Math.abs(targetYPos - characterYPos) ) {
-        if (targetXPos > playerXPos) {
+        if (targetXPos > characterXPos) {
             walk(character, 'right');
         } else {
             walk(character, 'left');
