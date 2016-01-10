@@ -106,13 +106,13 @@ recognition.onresult = function(event) {
         }
 
     }
-        // New update functions
-        aKey.onDown.add(attackEnemy, this);
-        if (speechInput.indexOf('attack') > -1){
-             attackEnemy();
-        }
-        eKey.onDown.add(createExplosion, this);
-        // New update functions
+        // // New update functions
+        // aKey.onDown.add(attackEnemy, this);
+        // if (speechInput.indexOf('attack') > -1){
+        //      attackEnemy();
+        // }
+        // eKey.onDown.add(createExplosion, this);
+        // // New update functions
 
 }
 
@@ -187,6 +187,27 @@ function create() {
 }
 
 function update() { // Empty right now but should contain buttons
+  if (cursors.left.isDown) {
+    walk(player, 'left');
+    monsterAction();
+  } else if (cursors.right.isDown) {
+    walk(player, 'right');
+    monsterAction();
+  } else if (cursors.down.isDown) {
+    walk(player, 'down');
+    monsterAction();
+  } else if (cursors.up.isDown) {
+    walk(player, 'up');
+    monsterAction();
+  }
+
+  // New update functions
+  aKey.onDown.add(attackEnemy, this);
+  if (speechInput.indexOf('attack') > -1){
+    attackEnemy();
+  }
+  eKey.onDown.add(createExplosion, this);
+  // New update functions
 }
 
 function createSoldiers() {
@@ -253,7 +274,8 @@ function walk (character, direction) {
         console.log(character.key+' is moving')
         tween = this.game.add.tween(character).to({x:newX, y:newY}, 800, null, true);
         tween.onComplete.addOnce(stopWalking, this);
-    } else {
+    }
+    else {
         stopWalking(character);
     }
 
