@@ -92,9 +92,7 @@ recognition.onresult = function(event) {
 
         // SELECTION COMMANDS
         if (match  = speechInput.match('(red|green|blue)')) {
-            player = soldiers.iterate('key', match[0]+'soldier', Phaser.Group.RETURN_CHILD);
-            selectedPlayerText.text = match[0];
-            selectedPlayerText.style.fill = match[0];
+          selectPlayer(match[0])
         }
 
         // MOVEMENT COMMANDS
@@ -128,9 +126,10 @@ function create() {
     stars = game.add.group();
     stars.enableBody = true;
 
-    //  The score
-    game.add.text(16, 30, 'Selected:', { font: '32px VT323', fill: '#000' });
-    selectedPlayerText = game.add.text(150, 30, 'NONE', { font: 'bold 32px VT323', fill: '#FFF' });
+    //  The select text
+    game.add.text(10, 30, 'Selected:', { font: '20px "Press Start 2P"', fill: '#000' });
+    selectedPlayerText = game.add.text(200, 30, 'red', { font: '20px "Press Start 2P"'});
+    selectPlayer('red')
 
     // Start speech recognition
     recognition.start();
@@ -168,6 +167,11 @@ function configureKeys() {
       }
 
       // Add callbacks to keys
+      // selection keys
+      key_ONE.onDown.add(function(){selectPlayer('red')}, this );
+      key_TWO.onDown.add(function(){selectPlayer('blue')}, this );
+      key_THREE.onDown.add(function(){selectPlayer('green')}, this );
+      // movement keys
       key_W.onDown.add(function(){playerWalk('up')}, this );
       key_A.onDown.add(function(){playerWalk('left')}, this );
       key_S.onDown.add(function(){playerWalk('down')}, this );
@@ -285,19 +289,10 @@ function monsterAction () {
     }
 }
 
-function collectStar (player, star) {
-    // Removes the star from the screen
-    console.log("Gotcha!");
-    star.kill();
-    if (star.group) {
-       star.group.remove(star);
-    } else if (star.parent) {
-       star.parent.removeChild(star);
-    }
-    //  Add and update the score
-    score += 10;
-    selectedPlayerText.text = 'Score: ' + score;
-
+function selectPlayer(color){
+  player = soldiers.iterate('key', color+'soldier', Phaser.Group.RETURN_CHILD);
+  selectedPlayerText.text = color;
+  selectedPlayerText.style.fill = color;
 }
 
 // New Functions
@@ -368,7 +363,7 @@ function createHealthBars(){
     playerHealthBar.crop(new Phaser.Rectangle(0,0,healthBarWidth,healthBarHeight));
     enemyHealthBar = game.add.sprite(0, 0, 'healthBar');    /////////
     enemyHealthBar.crop(new Phaser.Rectangle(0,0,healthBarWidth,healthBarHeight));
-    APText = game.add.text(0, game.world.height-(healthBarHeight*2), 'AP: ' + AP, { font: '32px VT323',           fill: '#000' });
+    APText = game.add.text(10, game.world.height-(healthBarHeight*2), 'AP: ' + AP, { font: '20px "Press Start 2P"',           fill: '#000' });
 }
 
 
