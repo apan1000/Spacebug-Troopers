@@ -71,6 +71,7 @@ function row(row, col){return _.range(col*row, col*row+col);}
 recognition.onresult = function(event) {
 
     var speechInput = '';
+    var final_transcript = '';
 
     // Put all results into a single string
     for (var i = event.resultIndex; i < event.results.length; ++i) {
@@ -81,7 +82,6 @@ recognition.onresult = function(event) {
         }
     }
 
-    game.debug.text(speechInput, game.world.height/2-20, game.world.width/2-30, "#000000");
     document.getElementById('command-text').innerHTML = speechInput;
 
     var match = '';
@@ -283,7 +283,7 @@ function walkToward (character, targetColor) {
             walk(character, 'up');
         }
     } else if ( Math.abs(targetXPos - characterXPos) > Math.abs(targetYPos - characterYPos) ) {
-        if (targetXPos > playerXPos) {
+        if (targetXPos > characterXPos) {
             walk(character, 'right');
         } else {
             walk(character, 'left');
