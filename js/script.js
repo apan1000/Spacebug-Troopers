@@ -33,7 +33,9 @@ var qKey;
 var explosion;
 var playerXPos;
 var playerYPos;
+
 var SFX;
+var explosion;
 
 var SCALE = 3;
 
@@ -84,8 +86,10 @@ function create() {
     //  Create our controls.
     configureKeys();
 
+    //Create sprites and animations
     createMonsters();
     createSoldiers();
+    createExplosion();
 
     //  The select text
     game.add.text(10, 5, 'Selected:', { font: '20px "Press Start 2P"', fill: '#000' });
@@ -143,7 +147,7 @@ function configureKeys() {
 // Gets frames numbers for a row from a spritesheet.
 function row(row, col){return _.range(col*row, col*row+col);}
 
-// Special fuction for getting the player to walk
+// Special function for getting the player to walk
 function playerWalk(direction){
   if(animationRunning) return; // Do nothing if an animation is still going
   walk(player, direction);
@@ -194,6 +198,15 @@ function createMonsters() {
     monsters.callAll('play', null, 'walk_down');
 }
 
+function createExplosion(){
+  explosion = game.add.sprite(0, 0, 'explosion');
+  explosion.visible = false;
+  explosion.anchor.setTo(.5, .5);
+  explosion.scale.setTo(SCALE);
+  explosion.animations.add('boom');
+  explosion.events.onAnimationComplete.add(function(){explosion.visible = false;},this);
+}
+
 function walk (character, direction) {
     var x = 0;
     var y = 0;
@@ -222,22 +235,29 @@ function walk (character, direction) {
         tween = this.game.add.tween(character).to({x:newX, y:newY}, 800, null, true);
         tween.onComplete.addOnce(stopWalking, this);
       }
-
     }
 }
 
 function soldierCollision(newX, newY){
   for (soldier of soldiers.children) {
-    console.log("x = "+newX+" y = "+newY);
-    console.log("x = "+soldier.x+" y = "+soldier.y);
     if(soldier.x == newX && soldier.y == newY) return true;
   }
   //If here then there is no collision
   console.log("No collision!")
   return false;
-
 }
 
+function monsterCollision(character){
+  for (monster of monsters.children) {
+    if(monster.x == character.x && monster.y == character.y) {
+      monster.destroy();
+      return true;
+    }
+  }
+  //If here then there is no collision
+  console.log("No collision!")
+  return false;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // CALLBACKS
@@ -291,6 +311,7 @@ function stopWalking (character) {
     character.scale.setTo(SCALE,SCALE); //Unmirror character
     player.animations.stop();
     character.frame = 0;
+    if(monsterCollision(player)) explode(player.x, player.y);
     animationRunning = false;
     console.log(character.key+' is idle');
 }
@@ -345,11 +366,11 @@ function selectPlayer(color){
 
 // New Functions
 
-function createExplosion(){
-    var explosion = game.add.sprite(104, 104, 'explosion');
-    explosion.scale.setTo(SCALE);
-    explosion.animations.add('boom');
-    explosion.play('boom', 20, false, true);
+function explode(x,y){
+    explosion.x = x;
+    explosion.y = y;
+    explosion.visible = true;
+    explosion.play('boom');
     SFX.play();
 }
 
