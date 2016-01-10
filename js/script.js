@@ -257,7 +257,6 @@ function walk (character, direction) {
     else {
         stopWalking(character);
     }
-    createExplosion();
 }
 
 function walkToward (character, targetColor) {
