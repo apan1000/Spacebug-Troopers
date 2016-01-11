@@ -268,7 +268,7 @@ function monsterAction() {
     var x, y;
 
     for (soldier of soldiers.children) {
-      var distance = Math.sqrt((soldier.x-monster.x)^2 + (soldier.y-monster.y)^2);
+      var distance = Math.sqrt(Math.pow((soldier.x-monster.x),2) + Math.pow((soldier.y-monster.y),2));
       if(distance < minDistance){
         minDistance = distance;
         x = soldier.x;
@@ -289,12 +289,10 @@ function monsterAction() {
     for (var i = 0; i < moves.length; i++) {
       newX = monster.x+moves[i][0];
       newY = monster.y+moves[i][1];
-          console.log("Move to "+ newX +"," + newY);
       if(notOutside(newX, newY)){
-        var distance = Math.sqrt((x-newX)^2 + (y-newY^2));
-        console.log("Distance is "+ distance)
+        var distance = Math.sqrt(Math.pow((x-newX),2) + Math.pow((y-newY),2));
         if(distance > maxDistance){
-          distance = maxDistance;
+          maxDistance = distance;
           index = i;
         }
       }
@@ -437,5 +435,5 @@ function stopWalking (character) {
     character.frame = 0;
     if(monsterCollision(player)) explode(player.x, player.y);
     animationRunning = false;
-    console.log(character.key+' is idle');
+    // console.log(character.key+' is idle');
 }
