@@ -16,7 +16,6 @@ recognition.onend = function() {recognition.start();}
 
 // GAME VARIABLES
 var game = new Phaser.Game(700, 700, Phaser.CANVAS, '', { preload: preload, create: create, update: update });
-game.ScaleManager
 
 var player;
 var monsters = [];
@@ -24,7 +23,6 @@ var platforms;
 var cursors;
 var animationRunning = false;
 
-var stars;
 var score = 0;
 var selectedPlayerText;
 var winText;
@@ -492,10 +490,7 @@ function OnVoiceRecognition(event) {
     // MOVEMENT COMMANDS
     if ( match = speechInput.match('(up|left|right|down)') ) {
         playerWalk(match[0]);
-    }
-
-    // Commented away becuase it does not increase score
-    else if ( match = speechInput.match('(black|yellow|orange)') ) {
+    } else if ( match = speechInput.match('(black|yellow|orange)') ) {
         walkToward(player, match[0]);
     }
 
