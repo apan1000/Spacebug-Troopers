@@ -149,7 +149,7 @@ function row(row, col){return _.range(col*row, col*row+col);}
 function playerWalk(direction){
   if(animationRunning) return; // Do nothing if an animation is still going
   walk(player, direction);
-  monsterAction(direction);
+  monsterAction();
   updateScore();
 }
 
@@ -224,7 +224,7 @@ function walk (character, direction) {
     var newY = character.y + y;
 
     //Create a transition to the new location
-    if(newX < game.world.width && newX > 0 && newY < game.world.height && newY > 0) {
+    if(isOutside(newX, newY)) {
       if(!soldierCollision(newX, newY)){
         if(x==100) character.scale.setTo(-SCALE,SCALE); //mirror character
         character.animations.play('walk_'+direction, 10, true);
@@ -234,6 +234,10 @@ function walk (character, direction) {
         tween.onComplete.addOnce(stopWalking, this);
       }
     }
+}
+
+function isOutside(x, y){
+  return (x < game.world.width && x > 0 && y < game.world.height && y > 0);
 }
 
 function soldierCollision(newX, newY){
@@ -256,6 +260,124 @@ function monsterCollision(character){
   console.log("No collision!")
   return false;
 }
+
+function monsterAction() {
+  for (monster of monsters.children) {
+    // Determine the position of the closest soldier
+    var minDistance = 999;
+    var x, y;
+
+    for (soldier of soldiers.children) {
+      var distance = Math.sqrt((soldier.x-monster.x)^2 + (soldier.y-monster.y)^2);
+      if(distance < minDistance){
+        minDistance = distance;
+        x = soldier.x;
+        y = soldier.y;
+      }
+    }
+    // There is a maximum of 4 positions a monster can move.
+    // Determine which one maximizes distance.
+    var moves = [
+      [100, 0, 'right'],
+      [-100,0, 'left'],
+      [0,100, 'down'],
+      [0,-100, 'up']
+    ];
+    var index = 0;
+    var maxDistance = 0;
+    for (var i = 0; i < moves.length; i++) {
+      newX = monster.x+moves[i][0];
+      newY = monster.y+moves[i][1];
+      if(!isOutside){
+        var distance = Math.sqrt((x-newX)^2 + (y-newY^2));
+        if(distance > maxDistance){
+          distance = maxDistance;
+          index = i;
+        }
+      }
+    }
+    console.log(moves[index][2]);
+    walk(monster, moves[index][2]);
+  }
+
+    // var randomMon = monsters.getRandom();
+    // console.log(randomMon);
+    // walkToward(randomMon, player);
+}
+
+function selectPlayer(color){
+  if(animationRunning) return; // Do nothing if an animation is still going
+  player = soldiers.iterate('key', color+'soldier', Phaser.Group.RETURN_CHILD);
+  selectedPlayerText.text = color;
+  selectedPlayerText.style.fill = color;
+}
+
+// New Functions
+
+function explode(x,y){
+    explosion.x = x;
+    explosion.y = y;
+    explosion.visible = true;
+    explosion.play('boom');
+    SFX.play();
+}
+
+function updateScore(){
+  score++;
+  scoreText.text = score;
+}
+
+function createHealthBars(){
+    playerHealthBar = game.add.sprite(0, game.world.height-healthBarHeight, 'healthBar');   /////////
+    playerHealthBar.crop(new Phaser.Rectangle(0,0,healthBarWidth,healthBarHeight));
+    enemyHealthBar = game.add.sprite(0, 0, 'healthBar');    /////////
+    enemyHealthBar.crop(new Phaser.Rectangle(0,0,healthBarWidth,healthBarHeight));
+    APText = game.add.text(10, game.world.height-(healthBarHeight*2), 'AP: ' + AP, { font: '20px "Press Start 2P"',           fill: '#000' });
+}
+
+function reset(){
+  monsters.destroy();
+  soldiers.destroy();
+  createMonsters();
+  createSoldiers();
+
+  animationRunning = false;
+
+  score = 0
+  scoreText.text = score;
+  selectPlayer('red');
+}
+
+function walkToward (character, targetColor) {
+    var characterXPos = character.position.x;
+    var characterYPos = character.position.y;
+
+    if(character.key == 'monster') {
+        var target = player;
+    } else {
+        var target = monsters.iterate('name', targetColor, Phaser.Group.RETURN_CHILD);
+    }
+
+    var targetXPos = target.position.x;
+    var targetYPos = target.position.y;
+
+    if ( Math.abs(targetXPos - characterXPos) <= Math.abs(targetYPos - characterYPos) ) {
+        if (targetYPos > characterYPos) {
+            walk(character, 'down');
+        } else {
+            walk(character, 'up');
+        }
+    } else if ( Math.abs(targetXPos - characterXPos) > Math.abs(targetYPos - characterYPos) ) {
+        if (targetXPos > characterXPos) {
+            walk(character, 'right');
+        } else {
+            walk(character, 'left');
+        }
+    }
+}
+
+
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // CALLBACKS
@@ -314,99 +436,3 @@ function stopWalking (character) {
     animationRunning = false;
     console.log(character.key+' is idle');
 }
-
-
-
-function walkToward (character, targetColor) {
-    var characterXPos = character.position.x;
-    var characterYPos = character.position.y;
-
-    if(character.key == 'monster') {
-        var target = player;
-    } else {
-        var target = monsters.iterate('name', targetColor, Phaser.Group.RETURN_CHILD);
-    }
-
-    var targetXPos = target.position.x;
-    var targetYPos = target.position.y;
-
-    if ( Math.abs(targetXPos - characterXPos) <= Math.abs(targetYPos - characterYPos) ) {
-        if (targetYPos > characterYPos) {
-            walk(character, 'down');
-        } else {
-            walk(character, 'up');
-        }
-    } else if ( Math.abs(targetXPos - characterXPos) > Math.abs(targetYPos - characterYPos) ) {
-        if (targetXPos > characterXPos) {
-            walk(character, 'right');
-        } else {
-            walk(character, 'left');
-        }
-    }
-}
-
-function monsterAction (direction) {
-  var opposite;
-  switch(direction){
-      case 'up': opposite = 'down'; break;
-      case 'down': opposite = 'up'; break;
-      case 'left':opposite = 'right'; break;
-      case 'right': opposite = 'left'; break;
-  }
-for (monster of monsters.children) {
-
-    walk(monster, direction)
-}
-
-
-    // var randomMon = monsters.getRandom();
-    // console.log(randomMon);
-    // walkToward(randomMon, player);
-}
-
-function selectPlayer(color){
-  if(animationRunning) return; // Do nothing if an animation is still going
-  player = soldiers.iterate('key', color+'soldier', Phaser.Group.RETURN_CHILD);
-  selectedPlayerText.text = color;
-  selectedPlayerText.style.fill = color;
-}
-
-// New Functions
-
-function explode(x,y){
-    explosion.x = x;
-    explosion.y = y;
-    explosion.visible = true;
-    explosion.play('boom');
-    SFX.play();
-}
-
-function updateScore(){
-  score++;
-  scoreText.text = score;
-}
-
-function createHealthBars(){
-    playerHealthBar = game.add.sprite(0, game.world.height-healthBarHeight, 'healthBar');   /////////
-    playerHealthBar.crop(new Phaser.Rectangle(0,0,healthBarWidth,healthBarHeight));
-    enemyHealthBar = game.add.sprite(0, 0, 'healthBar');    /////////
-    enemyHealthBar.crop(new Phaser.Rectangle(0,0,healthBarWidth,healthBarHeight));
-    APText = game.add.text(10, game.world.height-(healthBarHeight*2), 'AP: ' + AP, { font: '20px "Press Start 2P"',           fill: '#000' });
-}
-
-function reset(){
-  monsters.destroy();
-  soldiers.destroy();
-  createMonsters();
-  createSoldiers();
-
-  animationRunning = false;
-
-  score = 0
-  scoreText.text = score;
-  selectPlayer('red');
-}
-
-
-
-// New functions
