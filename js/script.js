@@ -267,8 +267,21 @@ function monsterAction() {
     var minDistance = 999;
     var x, y;
 
+    //Linear distance
+    // var calcDist = function(x1, y1, x2, y2) {
+    //   return Math.sqrt(
+    //     Math.pow((x2-x1),2) +
+    //     Math.pow((y2-y1),2)
+    //   );
+    // }
+
+    // dx + dy
+    var calcDist = function(x1, y1, x2, y2) {
+      return Math.abs(x2-x1) + Math.abs(y2-y1);
+    }
+
     for (soldier of soldiers.children) {
-      var distance = Math.sqrt(Math.pow((soldier.x-monster.x),2) + Math.pow((soldier.y-monster.y),2));
+      var distance = calcDist(monster.x, monster.y, soldier.x, soldier.y);
       if(distance < minDistance){
         minDistance = distance;
         x = soldier.x;
@@ -290,7 +303,8 @@ function monsterAction() {
       newX = monster.x+moves[i][0];
       newY = monster.y+moves[i][1];
       if(notOutside(newX, newY)){
-        var distance = Math.sqrt(Math.pow((x-newX),2) + Math.pow((y-newY),2));
+        var distance = calcDist(x, y, newX, newY);
+
         if(distance > maxDistance){
           maxDistance = distance;
           index = i;
