@@ -31,8 +31,6 @@ var selectedPlayerText;
 
 var qKey;
 var explosion;
-var playerXPos;
-var playerYPos;
 
 var SFX;
 var explosion;
@@ -338,7 +336,7 @@ function walkToward (character, targetColor) {
             walk(character, 'up');
         }
     } else if ( Math.abs(targetXPos - characterXPos) > Math.abs(targetYPos - characterYPos) ) {
-        if (targetXPos > playerXPos) {
+        if (targetXPos > characterXPos) {
             walk(character, 'right');
         } else {
             walk(character, 'left');
@@ -347,12 +345,8 @@ function walkToward (character, targetColor) {
 }
 
 function monsterAction () {
-    playerXPos = player.position.x;
-    playerYPos = player.position.y;
     var randomMon = monsters.getRandom();
     console.log(randomMon);
-    monsterXPos = randomMon.position.x;
-    monsterYPos = randomMon.position.y;
 
     walkToward(randomMon, player);
 }
