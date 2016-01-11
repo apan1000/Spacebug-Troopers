@@ -122,8 +122,8 @@ function configureKeys() {
       // Add callbacks to keys
       // selection keys
       key_ONE.onDown.add(function(){selectPlayer('red')}, this );
-      key_TWO.onDown.add(function(){selectPlayer('blue')}, this );
-      key_THREE.onDown.add(function(){selectPlayer('green')}, this );
+      key_TWO.onDown.add(function(){selectPlayer('green')}, this );
+      key_THREE.onDown.add(function(){selectPlayer('blue')}, this );
       // movement keys
       key_W.onDown.add(function(){playerWalk('up')}, this );
       key_A.onDown.add(function(){playerWalk('left')}, this );
@@ -224,7 +224,7 @@ function walk (character, direction) {
     var newY = character.y + y;
 
     //Create a transition to the new location
-    if(isOutside(newX, newY)) {
+    if(notOutside(newX, newY)) {
       if(!soldierCollision(newX, newY)){
         if(x==100) character.scale.setTo(-SCALE,SCALE); //mirror character
         character.animations.play('walk_'+direction, 10, true);
@@ -236,7 +236,7 @@ function walk (character, direction) {
     }
 }
 
-function isOutside(x, y){
+function notOutside(x, y){
   return (x < game.world.width && x > 0 && y < game.world.height && y > 0);
 }
 
@@ -257,7 +257,7 @@ function monsterCollision(character){
     }
   }
   //If here then there is no collision
-  console.log("No collision!")
+  // console.log("No collision!")
   return false;
 }
 
@@ -275,6 +275,7 @@ function monsterAction() {
         y = soldier.y;
       }
     }
+    console.log("Closest sordier is at "+ x +"," + y);
     // There is a maximum of 4 positions a monster can move.
     // Determine which one maximizes distance.
     var moves = [
@@ -288,8 +289,10 @@ function monsterAction() {
     for (var i = 0; i < moves.length; i++) {
       newX = monster.x+moves[i][0];
       newY = monster.y+moves[i][1];
-      if(!isOutside){
+          console.log("Move to "+ newX +"," + newY);
+      if(notOutside(newX, newY)){
         var distance = Math.sqrt((x-newX)^2 + (y-newY^2));
+        console.log("Distance is "+ distance)
         if(distance > maxDistance){
           distance = maxDistance;
           index = i;
