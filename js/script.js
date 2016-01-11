@@ -30,10 +30,10 @@ var selectedPlayerText;
 var winText;
 
 var qKey;
-var explosion;
 
-var SFX;
 var explosion;
+var boom_sfx;
+var bonk_sfx;
 
 var SCALE = 3;
 
@@ -66,7 +66,8 @@ function preload() {
     // New preloads
     game.load.image('healthBar', 'assets/health.png');
     game.load.spritesheet('explosion', 'assets/explosion.png', 32,32);
-    game.load.audio('sfx', 'assets/SFX/Explosion.wav');
+    game.load.audio('boom_sfx', 'assets/SFX/Explosion.wav');
+    game.load.audio('bonk_sfx', 'assets/SFX/Bonk.wav');
     // New preloads
 }
 
@@ -74,8 +75,11 @@ function preload() {
 function create() {
 
     // New create stuff
-    SFX = game.add.audio('sfx');
-    SFX.allowMultiple = true;
+    boom_sfx = game.add.audio('boom_sfx');
+    boom_sfx.allowMultiple = true;
+
+    bonk_sfx = game.add.audio('bonk_sfx');
+    bonk_sfx.allowMultiple = true;
 
 
     //  A simple background for our game
@@ -148,10 +152,37 @@ function row(row, col){return _.range(col*row, col*row+col);}
 // Special function for getting the player to walk
 function playerWalk(direction){
     if(animationRunning) return; // Do nothing if an animation is still going
-    walk(player, direction);
-    monsterAction();
-    if(winText == null){
-        updateScore();
+
+    var x = 0;
+    var y = 0;
+
+    // Check if colliding with wall or other player character
+    switch(direction){
+        case 'up': y = -100; break;
+        case 'down': y = 100; break;
+        case 'left':x = -100; break;
+        case 'right': x = 100; break;
+    }
+
+    //Calculate new position
+    var newX = player.x + x;
+    var newY = player.y + y;
+
+    //Create a transition to the new location
+    if( notOutside(newX, newY) ) {
+        if( !soldierCollision(newX, newY) ) {
+
+            walk(player, direction);
+            monsterAction();
+            if(winText == null){
+                updateScore();
+            }
+
+        } else {
+            bonk_sfx.play();
+        }
+    } else {
+        bonk_sfx.play();
     }
 }
 
@@ -165,9 +196,10 @@ function createSoldiers() {
     //Add soldiers to group. Set anchor to middle so that character can be flipped without movement.
 
     for (var i = 0; i < colors.length; i++) {
-      var soldier = soldiers.create(250 + i*100, 650, colors[i]+'soldier');
-      soldier.anchor.setTo(.5, .5);
-      soldier.scale.setTo(SCALE);
+        var soldier = soldiers.create(250 + i*100, 650, colors[i]+'soldier');
+        soldier.anchor.setTo(.5, .5);
+        soldier.scale.setTo(SCALE);
+        soldier.type = 'soldier';
     }
 
     //Add animations to group
@@ -191,6 +223,7 @@ function createMonsters() {
         monster.scale.setTo(SCALE);
         monster.tint = monsterColors[i];
         monster.name = monsterNames[i];
+        monster.type = 'monster';
     }
 
     //Add animations to group. Play animation continously.
@@ -210,7 +243,7 @@ function createExplosion(){
 function walk (character, direction) {
     var x = 0;
     var y = 0;
-    var directionText = direction;
+    // var directionText = direction;
 
     switch(direction){
         case 'up': y = -100; break;
@@ -226,16 +259,17 @@ function walk (character, direction) {
     var newY = character.y + y;
 
     //Create a transition to the new location
-    if(notOutside(newX, newY)) {
-      if(!soldierCollision(newX, newY)){
-        if(x==100) character.scale.setTo(-SCALE,SCALE); //mirror character
-        character.animations.play('walk_'+direction, 10, true);
-        animationRunning = true;
-        console.log(character.key+' is moving')
-        tween = this.game.add.tween(character).to({x:newX, y:newY}, 800, null, true);
-        tween.onComplete.addOnce(stopWalking, this);
-      }
+    if( notOutside(newX, newY) ) {
+        if( !soldierCollision(newX, newY) ) {
+            if(x==100) character.scale.setTo(-SCALE,SCALE); //mirror character
+            character.animations.play('walk_'+direction, 10, true);
+            animationRunning = true;
+            console.log(character.key+' is moving')
+            tween = this.game.add.tween(character).to({x:newX, y:newY}, 800, null, true);
+            tween.onComplete.addOnce(stopWalking, this);
+        }
     }
+
 }
 
 function stopWalking (character) {
@@ -347,12 +381,13 @@ function explode(x,y){
     explosion.y = y;
     explosion.visible = true;
     explosion.play('boom');
-    SFX.play();
+    boom_sfx.play();
 }
 
 function updateScore(){
     score++;
     scoreText.text = score;
+    console.log("updateScore",score);
 }
 
 function createHealthBars(){
@@ -382,29 +417,35 @@ function reset(){
 }
 
 function walkToward (character, targetColor) {
-    var characterXPos = character.position.x;
-    var characterYPos = character.position.y;
 
-    if(character.key == 'monster') {
+    if(character.type == 'monster') {
         var target = player;
     } else {
+        if(animationRunning) return; // Do nothing if an animation is still going
         var target = monsters.iterate('name', targetColor, Phaser.Group.RETURN_CHILD);
     }
+
+    var characterXPos = character.position.x;
+    var characterYPos = character.position.y;
 
     var targetXPos = target.position.x;
     var targetYPos = target.position.y;
 
     if ( Math.abs(targetXPos - characterXPos) <= Math.abs(targetYPos - characterYPos) ) {
         if (targetYPos > characterYPos) {
-            walk(character, 'down');
+            if(character.type == 'soldier') playerWalk('down');
+            else walk(character, 'down');
         } else {
-            walk(character, 'up');
+            if(character.type == 'soldier') playerWalk('up');
+            else walk(character, 'up');
         }
     } else if ( Math.abs(targetXPos - characterXPos) > Math.abs(targetYPos - characterYPos) ) {
         if (targetXPos > characterXPos) {
-            walk(character, 'right');
+            if(character.type == 'soldier') playerWalk('right');
+            else walk(character, 'right');
         } else {
-            walk(character, 'left');
+            if(character.type == 'soldier') playerWalk('left');
+            else walk(character, 'left');
         }
     }
 }
@@ -445,18 +486,18 @@ function OnVoiceRecognition(event) {
 
     // SELECTION COMMANDS
     if ( match  = speechInput.match('(red|green|blue)') ) {
-      selectPlayer(match[0])
+        selectPlayer(match[0])
     }
 
     // MOVEMENT COMMANDS
     if ( match = speechInput.match('(up|left|right|down)') ) {
-      playerWalk(match[0]);
+        playerWalk(match[0]);
     }
 
     // Commented away becuase it does not increase score
-    //else if ( match = speechInput.match('(black|yellow|orange)') ) {
-    //     walkToward(player, match[0]);
-    // }
+    else if ( match = speechInput.match('(black|yellow|orange)') ) {
+        walkToward(player, match[0]);
+    }
 
 
 }
