@@ -27,7 +27,7 @@ var animationRunning = false;
 var stars;
 var score = 0;
 var selectedPlayerText;
-var selectedPlayerText;
+var winText;
 
 var qKey;
 var explosion;
@@ -150,7 +150,9 @@ function playerWalk(direction){
   if(animationRunning) return; // Do nothing if an animation is still going
   walk(player, direction);
   monsterAction();
-  updateScore();
+  if(winText == null){
+    updateScore();
+  }
 }
 
 // Creates a new set of soldiers
@@ -353,6 +355,8 @@ function createHealthBars(){
 function reset(){
   monsters.destroy();
   soldiers.destroy();
+  winText.destroy();
+
   createMonsters();
   createSoldiers();
 
@@ -391,6 +395,12 @@ function walkToward (character, targetColor) {
     }
 }
 
+function winCheck(){
+  if(monsters.children.length == 0) {
+    winText = game.add.text(game.world.width/2, game.world.height/2, 'YOU WON!', { font: '60px "Press Start 2P"', fill: "#ff0"});
+    winText.anchor.set(0.5);
+  }
+}
 
 
 
@@ -449,5 +459,6 @@ function stopWalking (character) {
     character.frame = 0;
     if(monsterCollision(player)) explode(player.x, player.y);
     animationRunning = false;
+    winCheck();
     // console.log(character.key+' is idle');
 }
