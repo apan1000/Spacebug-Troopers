@@ -149,7 +149,7 @@ function row(row, col){return _.range(col*row, col*row+col);}
 function playerWalk(direction){
   if(animationRunning) return; // Do nothing if an animation is still going
   walk(player, direction);
-  monsterAction();
+  monsterAction(direction);
   updateScore();
 }
 
@@ -289,12 +289,13 @@ function OnVoiceRecognition(event) {
 
     // MOVEMENT COMMANDS
     if ( match = speechInput.match('(up|left|right|down)') ) {
-      walk(player, match[0]);
-      monsterAction();
-    } else if ( match = speechInput.match('(black|yellow|orange)') ) {
-        walkToward(player, match[0]);
-        monsterAction();
+      playerWalk(match[0]);
     }
+
+    // Commented away becuase it does not increase score
+    //else if ( match = speechInput.match('(black|yellow|orange)') ) {
+    //     walkToward(player, match[0]);
+    // }
 
 
 }
@@ -344,11 +345,23 @@ function walkToward (character, targetColor) {
     }
 }
 
-function monsterAction () {
-    var randomMon = monsters.getRandom();
-    console.log(randomMon);
+function monsterAction (direction) {
+  var opposite;
+  switch(direction){
+      case 'up': opposite = 'down'; break;
+      case 'down': opposite = 'up'; break;
+      case 'left':opposite = 'right'; break;
+      case 'right': opposite = 'left'; break;
+  }
+for (monster of monsters.children) {
 
-    walkToward(randomMon, player);
+    walk(monster, direction)
+}
+
+
+    // var randomMon = monsters.getRandom();
+    // console.log(randomMon);
+    // walkToward(randomMon, player);
 }
 
 function selectPlayer(color){
