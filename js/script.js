@@ -147,12 +147,12 @@ function row(row, col){return _.range(col*row, col*row+col);}
 
 // Special function for getting the player to walk
 function playerWalk(direction){
-  if(animationRunning) return; // Do nothing if an animation is still going
-  walk(player, direction);
-  monsterAction();
-  if(winText == null){
-    updateScore();
-  }
+    if(animationRunning) return; // Do nothing if an animation is still going
+    walk(player, direction);
+    monsterAction();
+    if(winText == null){
+        updateScore();
+    }
 }
 
 // Creates a new set of soldiers
@@ -199,12 +199,12 @@ function createMonsters() {
 }
 
 function createExplosion(){
-  explosion = game.add.sprite(0, 0, 'explosion');
-  explosion.visible = false;
-  explosion.anchor.setTo(.5, .5);
-  explosion.scale.setTo(SCALE);
-  explosion.animations.add('boom');
-  explosion.events.onAnimationComplete.add(function(){explosion.visible = false;},this);
+    explosion = game.add.sprite(0, 0, 'explosion');
+    explosion.visible = false;
+    explosion.anchor.setTo(.5, .5);
+    explosion.scale.setTo(SCALE);
+    explosion.animations.add('boom');
+    explosion.events.onAnimationComplete.add(function(){explosion.visible = false;},this);
 }
 
 function walk (character, direction) {
@@ -238,29 +238,40 @@ function walk (character, direction) {
     }
 }
 
+function stopWalking (character) {
+    //Stop walking animations
+    character.scale.setTo(SCALE,SCALE); //Unmirror character
+    player.animations.stop();
+    character.frame = 0;
+    if(monsterCollision(player)) explode(player.x, player.y);
+    animationRunning = false;
+    winCheck();
+    // console.log(character.key+' is idle');
+}
+
 function notOutside(x, y){
-  return (x < game.world.width && x > 0 && y < game.world.height && y > 0);
+    return (x < game.world.width && x > 0 && y < game.world.height && y > 0);
 }
 
 function soldierCollision(newX, newY){
-  for (soldier of soldiers.children) {
-    if(soldier.x == newX && soldier.y == newY) return true;
-  }
-  //If here then there is no collision
-  console.log("No collision!")
-  return false;
+    for (soldier of soldiers.children) {
+        if(soldier.x == newX && soldier.y == newY) return true;
+    }
+    //If here then there is no collision
+    console.log("No collision!")
+    return false;
 }
 
 function monsterCollision(character){
-  for (monster of monsters.children) {
-    if(monster.x == character.x && monster.y == character.y) {
-      monster.destroy();
-      return true;
+    for (monster of monsters.children) {
+        if(monster.x == character.x && monster.y == character.y) {
+            monster.destroy();
+            return true;
+        }
     }
-  }
-  //If here then there is no collision
-  // console.log("No collision!")
-  return false;
+    //If here then there is no collision
+    // console.log("No collision!")
+    return false;
 }
 
 function monsterAction() {
@@ -323,10 +334,10 @@ function monsterAction() {
 }
 
 function selectPlayer(color){
-  if(animationRunning) return; // Do nothing if an animation is still going
-  player = soldiers.iterate('key', color+'soldier', Phaser.Group.RETURN_CHILD);
-  selectedPlayerText.text = color;
-  selectedPlayerText.style.fill = color;
+    if(animationRunning) return; // Do nothing if an animation is still going
+    player = soldiers.iterate('key', color+'soldier', Phaser.Group.RETURN_CHILD);
+    selectedPlayerText.text = color;
+    selectedPlayerText.style.fill = color;
 }
 
 // New Functions
@@ -340,8 +351,8 @@ function explode(x,y){
 }
 
 function updateScore(){
-  score++;
-  scoreText.text = score;
+    score++;
+    scoreText.text = score;
 }
 
 function createHealthBars(){
@@ -353,18 +364,21 @@ function createHealthBars(){
 }
 
 function reset(){
-  monsters.destroy();
-  soldiers.destroy();
-  winText.destroy();
+    monsters.destroy();
+    soldiers.destroy();
+    if(winText) {
+        winText.destroy();
+    }
 
-  createMonsters();
-  createSoldiers();
+    animationRunning = false;
 
-  animationRunning = false;
+    score = 0;
+    scoreText.text = score;
 
-  score = 0
-  scoreText.text = score;
-  selectPlayer('red');
+    createMonsters();
+    createSoldiers();
+
+    selectPlayer('red');
 }
 
 function walkToward (character, targetColor) {
@@ -396,10 +410,10 @@ function walkToward (character, targetColor) {
 }
 
 function winCheck(){
-  if(monsters.children.length == 0) {
-    winText = game.add.text(game.world.width/2, game.world.height/2, 'YOU WON!', { font: '60px "Press Start 2P"', fill: "#ff0"});
-    winText.anchor.set(0.5);
-  }
+    if(monsters.children.length == 0) {
+        winText = game.add.text(game.world.width/2, game.world.height/2, 'YOU WON!', { font: '60px "Press Start 2P"', fill: "#ff0"});
+        winText.anchor.set(0.5);
+    }
 }
 
 
@@ -449,16 +463,5 @@ function OnVoiceRecognition(event) {
 
 //Gets called every frame
 function update() {
-  // Empty right now
-}
-
-function stopWalking (character) {
-    //Stop walking animations
-    character.scale.setTo(SCALE,SCALE); //Unmirror character
-    player.animations.stop();
-    character.frame = 0;
-    if(monsterCollision(player)) explode(player.x, player.y);
-    animationRunning = false;
-    winCheck();
-    // console.log(character.key+' is idle');
+    // Empty right now
 }
