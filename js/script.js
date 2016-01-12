@@ -100,7 +100,8 @@ function create() {
     // The text that counts the amount of moves
     game.add.text(10, 35, 'Score:', { font: '20px "Press Start 2P"', fill: '#000' });
 
-    scoreText = game.add.text(140, 35, score, { font: '20px "Press Start 2P"', fill: '#FFF'});
+    //scoreText = game.add.text(140, 35, score, { font: '20px "Press Start 2P"', fill: '#FFF'});
+    document.getElementById('step-number').innerHTML = score;
 
     // Start speech recognition
     recognition.start();
@@ -370,6 +371,7 @@ function selectPlayer(color){
     player = soldiers.iterate('key', color+'soldier', Phaser.Group.RETURN_CHILD);
     selectedPlayerText.text = color;
     selectedPlayerText.style.fill = color;
+    document.getElementById('selected-player').innerHTML = '<img id="selected-player" src="assets/star.png" alt="Selected Soldier">';
 }
 
 // New Functions
@@ -384,8 +386,9 @@ function explode(x,y){
 
 function updateScore(){
     score++;
-    scoreText.text = score;
+    //scoreText.text = score;
     console.log("updateScore",score);
+    document.getElementById('step-number').innerHTML = score;
 }
 
 function createHealthBars(){
@@ -406,7 +409,8 @@ function reset(){
     animationRunning = false;
 
     score = 0;
-    scoreText.text = score;
+    document.getElementById('step-number').innerHTML = score;
+    //scoreText.text = score;
 
     createMonsters();
     createSoldiers();
