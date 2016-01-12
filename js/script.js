@@ -15,7 +15,7 @@ recognition.onresult = OnVoiceRecognition;
 recognition.onend = function() {recognition.start();}
 
 // GAME VARIABLES
-var game = new Phaser.Game(700, 700, Phaser.CANVAS, '', { preload: preload, create: create, update: update });
+var game = new Phaser.Game(700, 700, Phaser.CANVAS, '', { preload: preload, create: create, update: update, render:render });
 
 var player;
 var monsters = [];
@@ -32,6 +32,8 @@ var qKey;
 var explosion;
 var boom_sfx;
 var bonk_sfx;
+var yes_commander;
+var music;
 
 var SCALE = 3;
 
@@ -45,6 +47,8 @@ var monsterNames = ['black', 'yellow', 'orange'];
 ////////////////////////////////////////////////////////////////////////////////
 
 function preload() {
+
+    game.time.advancedTiming = true;
 
     // Disable smoothing
     game.stage.smoothed = false;
@@ -66,7 +70,8 @@ function preload() {
     game.load.spritesheet('explosion', 'assets/explosion.png', 32,32);
     game.load.audio('boom_sfx', 'assets/SFX/Explosion.wav');
     game.load.audio('bonk_sfx', 'assets/SFX/Bonk.wav');
-    // New preloads
+    game.load.audio('space_music', ['assets/SFX/Space.mp3', 'assets/SFX/Space.ogg']);
+    game.load.audio('yes_commander', ['assets/SFX/yes_commander.mp3', 'assets/SFX/yes_commander.ogg']);
 }
 
 
@@ -75,10 +80,17 @@ function create() {
     // New create stuff
     boom_sfx = game.add.audio('boom_sfx');
     boom_sfx.allowMultiple = true;
+    boom_sfx.volume = .35;
 
     bonk_sfx = game.add.audio('bonk_sfx');
     bonk_sfx.allowMultiple = true;
 
+    yes_commander = game.add.audio('yes_commander');
+
+    music = game.add.audio('space_music');
+    music.volume = .2;
+    music.loop = true;
+    music.play();
 
     //  A simple background for our game
     game.add.sprite(0, 0, 'chessmap');
@@ -170,7 +182,11 @@ function playerWalk(direction){
     if( notOutside(newX, newY) ) {
         if( !soldierCollision(newX, newY) ) {
 
+            player.newX = newX;
+            player.newY = newY;
+
             walk(player, direction);
+            console.log(player.key, player.x, player.y);
             monsterAction();
             if(winText == null){
                 updateScore();
@@ -194,10 +210,14 @@ function createSoldiers() {
     //Add soldiers to group. Set anchor to middle so that character can be flipped without movement.
 
     for (var i = 0; i < colors.length; i++) {
-        var soldier = soldiers.create(250 + i*100, 650, colors[i]+'soldier');
+        var x = 250 + i*100;
+        var y = 650;
+        var soldier = soldiers.create(x, y, colors[i]+'soldier');
         soldier.anchor.setTo(.5, .5);
         soldier.scale.setTo(SCALE);
         soldier.type = 'soldier';
+        soldier.newX = x;
+        soldier.newY = y;
     }
 
     //Add animations to group
@@ -216,12 +236,16 @@ function createMonsters() {
 
     //Add monsters to group
     for (var i = 0; i < 3; i++) {
-        var monster = monsters.create(250 + i*100, 350, 'monster');
+        var x = 150 + i*200;
+        var y = 150 + i*200;
+        var monster = monsters.create(x, y, 'monster');
         monster.anchor.setTo(.5, .5);
         monster.scale.setTo(SCALE);
         monster.tint = monsterColors[i];
         monster.name = monsterNames[i];
         monster.type = 'monster';
+        monster.newX = x;
+        monster.newY = y;
     }
 
     //Add animations to group. Play animation continously.
@@ -229,7 +253,7 @@ function createMonsters() {
     monsters.callAll('play', null, 'walk_down');
 }
 
-function createExplosion(){
+function createExplosion() {
     explosion = game.add.sprite(0, 0, 'explosion');
     explosion.visible = false;
     explosion.anchor.setTo(.5, .5);
@@ -238,12 +262,12 @@ function createExplosion(){
     explosion.events.onAnimationComplete.add(function(){explosion.visible = false;},this);
 }
 
-function walk (character, direction) {
+function walk(character, direction) {
     var x = 0;
     var y = 0;
     // var directionText = direction;
 
-    switch(direction){
+    switch(direction) {
         case 'up': y = -100; break;
         case 'down': y = 100; break;
         case 'left':x = -100; break;
@@ -259,10 +283,13 @@ function walk (character, direction) {
     //Create a transition to the new location
     if( notOutside(newX, newY) ) {
         if( !soldierCollision(newX, newY) ) {
+            character.newX = newX;
+            character.newY = newY;
+
             if(x==100) character.scale.setTo(-SCALE,SCALE); //mirror character
             character.animations.play('walk_'+direction, 10, true);
             animationRunning = true;
-            console.log(character.key+' is moving')
+            // console.log(character.key+' is moving')
             tween = this.game.add.tween(character).to({x:newX, y:newY}, 800, null, true);
             tween.onComplete.addOnce(stopWalking, this);
         }
@@ -270,95 +297,114 @@ function walk (character, direction) {
 
 }
 
-function stopWalking (character) {
+function stopWalking(character) {
     //Stop walking animations
     character.scale.setTo(SCALE,SCALE); //Unmirror character
     player.animations.stop();
     character.frame = 0;
-    if(monsterCollision(player)) explode(player.x, player.y);
+
+    var monster = monsterCollision(player);
+    if( monster != null ) {
+        console.log('monster!',monster);
+        monster.destroy();
+        explode(player.x, player.y);
+    }
     animationRunning = false;
     winCheck();
     // console.log(character.key+' is idle');
 }
 
-function notOutside(x, y){
+function notOutside(x, y) {
     return (x < game.world.width && x > 0 && y < game.world.height && y > 0);
 }
 
-function soldierCollision(newX, newY){
+function soldierCollision(newX, newY) {
     for (soldier of soldiers.children) {
         if(soldier.x == newX && soldier.y == newY) return true;
     }
     //If here then there is no collision
-    console.log("No collision!")
     return false;
 }
 
-function monsterCollision(character){
+function monsterCollision(character) {
     for (monster of monsters.children) {
-        if(monster.x == character.x && monster.y == character.y) {
-            monster.destroy();
-            return true;
+        if(monster.newX == character.x && monster.newY == character.y) {
+            return monster;
         }
     }
     //If here then there is no collision
-    // console.log("No collision!")
+    return null;
+}
+
+function monsterIsAt(x, y) {
+    for (var monster of monsters.children) {
+        if(monster.newX == x && monster.newY == y) {
+            console.log(monster.name, 'monsterIsAt', x, y);
+            return true;
+        }
+    }
     return false;
 }
 
 function monsterAction() {
-  for (monster of monsters.children) {
-    // Determine the position of the closest soldier
-    var minDistance = 999;
-    var x, y;
-
-    //Linear distance
-    // var calcDist = function(x1, y1, x2, y2) {
-    //   return Math.sqrt(
-    //     Math.pow((x2-x1),2) +
-    //     Math.pow((y2-y1),2)
-    //   );
-    // }
-
     // dx + dy
     var calcDist = function(x1, y1, x2, y2) {
-      return Math.abs(x2-x1) + Math.abs(y2-y1);
+        return Math.abs(x2-x1) + Math.abs(y2-y1);
     }
 
-    for (soldier of soldiers.children) {
-      var distance = calcDist(monster.x, monster.y, soldier.x, soldier.y);
-      if(distance < minDistance){
-        minDistance = distance;
-        x = soldier.x;
-        y = soldier.y;
-      }
-    }
-    console.log("Closest sordier is at "+ x +"," + y);
-    // There is a maximum of 4 positions a monster can move.
-    // Determine which one maximizes distance.
-    var moves = [
-      [100, 0, 'right'],
-      [-100,0, 'left'],
-      [0,100, 'down'],
-      [0,-100, 'up']
-    ];
-    var index = 0;
-    var maxDistance = 0;
-    for (var i = 0; i < moves.length; i++) {
-      newX = monster.x+moves[i][0];
-      newY = monster.y+moves[i][1];
-      if(notOutside(newX, newY)){
-        var distance = calcDist(x, y, newX, newY);
+    for (var monster of monsters.children) {
+        // Determine the position of the closest soldier
+        var x, y;
+        var minDistance = 999;
 
-        if(distance > maxDistance){
-          maxDistance = distance;
-          index = i;
+        //Linear distance
+        // var calcDist = function(x1, y1, x2, y2) {
+        //   return Math.sqrt(
+        //     Math.pow((x2-x1),2) +
+        //     Math.pow((y2-y1),2)
+        //   );
+        // }
+
+        for (var soldier of soldiers.children) {
+            var distance = calcDist(monster.x, monster.y, soldier.newX, soldier.newY);
+            if(distance < minDistance) {
+                minDistance = distance;
+                // console.log('minDistance', minDistance);
+                x = soldier.newX;
+                y = soldier.newY;
+            }
         }
-      }
+        // console.log("Closest soldier is at "+ x +"," + y);
+
+        // There is a maximum of 4 directions a monster can move.
+        // Determine which one maximizes distance.
+        var moves = [
+            [100, 0, 'right'],
+            [-100, 0, 'left'],
+            [0, 100, 'down'],
+            [0, -100, 'up']
+        ];
+        var index = 0;
+        var maxDistance = 0;
+        for (var i = 0; i < moves.length; i++) {
+
+            newX = monster.x + moves[i][0];
+            newY = monster.y + moves[i][1];
+            console.log(monster.name, i);
+            if( notOutside(newX, newY) && !monsterIsAt(newX, newY) ) {
+
+                var distance = calcDist(x, y, newX, newY);
+                if(distance > maxDistance) {
+                    maxDistance = distance;
+                    index = i;
+                }
+
+            }
+
+        }
+        console.log('monster move direction:',moves[index][2]);
+        walk(monster, moves[index][2]);
     }
-    console.log(moves[index][2]);
-    walk(monster, moves[index][2]);
-  }
 
     // var randomMon = monsters.getRandom();
     // console.log(randomMon);
@@ -388,7 +434,7 @@ function updateScore(){
     console.log("updateScore",score);
 }
 
-function createHealthBars(){
+function createHealthBars() {
     playerHealthBar = game.add.sprite(0, game.world.height-healthBarHeight, 'healthBar');   /////////
     playerHealthBar.crop(new Phaser.Rectangle(0,0,healthBarWidth,healthBarHeight));
     enemyHealthBar = game.add.sprite(0, 0, 'healthBar');    /////////
@@ -414,13 +460,18 @@ function reset(){
     selectPlayer('red');
 }
 
-function walkToward (character, targetColor) {
+function walkToward(character, targetColor) {
 
     if(character.type == 'monster') {
         var target = player;
     } else {
         if(animationRunning) return; // Do nothing if an animation is still going
         var target = monsters.iterate('name', targetColor, Phaser.Group.RETURN_CHILD);
+    }
+
+    // If no target found: return
+    if(!target) {
+        return;
     }
 
     var characterXPos = character.position.x;
@@ -490,8 +541,14 @@ function OnVoiceRecognition(event) {
     // MOVEMENT COMMANDS
     if ( match = speechInput.match('(up|left|right|down)') ) {
         playerWalk(match[0]);
+        if(score%4 === 0) {
+            yes_commander.play();
+        }
     } else if ( match = speechInput.match('(black|yellow|orange)') ) {
         walkToward(player, match[0]);
+        if(score%4 === 0) {
+            yes_commander.play();
+        }
     }
 
 
@@ -500,4 +557,8 @@ function OnVoiceRecognition(event) {
 //Gets called every frame
 function update() {
     // Empty right now
+}
+
+function render() {
+    // game.debug.text(game.time.fps || '--', 300, 300, "#f00");
 }
