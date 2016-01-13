@@ -654,7 +654,7 @@ function OnVoiceRecognition(event) {
                 monsterFreezeCount = 1;
                 console.log('monsterFreezeCount; ', monsterFreezeCount);
                 for (monster of monsters.children) {
-                    monster.tint = 0xe5ffff;
+                    monster.tint = 0x55a0ff;
                 }
             }
         }
