@@ -584,6 +584,7 @@ function freezeMonsters(numTurns) {
                 monster.tint = 0x55a0ff;
             }
             freeze_sfx.play();
+            game.plugins.cameraShake.shake(10, .5, -1, .3);
         }
     }
 }
@@ -621,6 +622,7 @@ function reset() {
 
     animationRunning = false;
 
+    monsterFreezeCount = 0;
     steps = 0;
     document.getElementById('step-number').innerHTML = steps;
 
