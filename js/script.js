@@ -23,18 +23,16 @@ function resetVoiceRecognition() {
 var game = new Phaser.Game(700, 700, Phaser.CANVAS, '', { preload: preload, create: create, update: update, render:render });
 
 var player;
-var monsters = [];
+var monsters;
 var platforms;
 var cursors;
 var animationRunning = false;
-var freezeStone;
+var freezeStones;
 var monsterFreezeCount = 0;
 
 var steps = 0;
 // var selectedPlayerText;
 var winText;
-
-var qKey;
 
 var explosion;
 var boom_sfx;
@@ -46,7 +44,12 @@ var music;
 var SCALE = 3;
 
 var colors = ['red', 'green', 'blue'];
-var monsterColors = [0x404040, 0xf0f000, 0xf050a0]; // Used for tinting
+var monsterColors = [0x404040, 0xf0f000, 0xf050a0];  // Used for tinting
+var monsterColors2 = {
+    black: 0x404040,
+    yellow: 0xf0f000,
+    orange: 0xf050a0
+}; // Used for tinting back from freeze
 var monsterNames = ['black', 'yellow', 'orange'];
 
 // High score
@@ -160,9 +163,6 @@ function create() {
     //  A simple background for our game
     game.add.sprite(0, 0, 'chessmap');
 
-    //  Create our controls.
-    configureKeys();
-
     //Create sprites and animations
     createMonsters();
     createSoldiers();
@@ -183,6 +183,9 @@ function create() {
     // Element with amount of moves
     document.getElementById('step-number').innerHTML = steps;
 
+    //  Create our controls.
+    configureKeys();
+    
     // Start speech recognition
     recognition.start();
 }
@@ -198,10 +201,8 @@ function configureKeys() {
       var key_D = game.input.keyboard.addKey(Phaser.Keyboard.D);
       var key_ESC = game.input.keyboard.addKey(Phaser.Keyboard.ESC);
       var key_V = game.input.keyboard.addKey(Phaser.Keyboard.V);
+      var key_E = game.input.keyboard.addKey(Phaser.Keyboard.E);
       var cursors = game.input.keyboard.createCursorKeys();
-
-      qKey = game.input.keyboard.addKey(Phaser.Keyboard.Q);
-      eKey = game.input.keyboard.addKey(Phaser.Keyboard.E);
 
       // Add callbacks to keys
       // selection keys
@@ -222,6 +223,9 @@ function configureKeys() {
       key_ESC.onDown.add(reset, this);
       // reset voice recognition
       key_V.onDown.add(resetVoiceRecognition, this);
+
+      // Use freeze
+      key_E.onDown.add(function(){freezeMonsters(2)}, this);
 
 }
 
@@ -294,10 +298,10 @@ function createFreezeStone() {
     freezeStones.enableBody = true;
 
     var x = 350; //+ (Math.round(Math.random()*3) + 1)*100;
-    var y = 150; + (Math.round(Math.random()*3) + 1)*-100;
+    var y = 150; //+ (Math.round(Math.random()*3) + 1)*-100;
     console.log(x,y);
     var freezeStone = freezeStones.create(x, y, 'freezeStone');
-        freezeStone.anchor.setTo(.5, .5);
+    freezeStone.anchor.setTo(.5, .5);
 }
 
 function createExplosion() {
@@ -392,15 +396,13 @@ function playerWalk(direction){
 
             walk(player, direction);
             console.log(player.key, player.x, player.y);
-            if (monsterFreezeCount == 0 || monsterFreezeCount > 2) {
+            if (monsterFreezeCount == 0) {
                 monsterAction();
-                var i = 0;
                 for (monster of monsters.children) {
-                    monster.tint = monsterColors[i];
-                    i++
+                    monster.tint = monsterColors2[monster.name];
                 }
-            } else if (monsterFreezeCount > 0 && monsterFreezeCount <= 2) {
-                monsterFreezeCount++
+            } else if (monsterFreezeCount > 0) {
+                monsterFreezeCount--
             }
             if(!winText.visible){
                 updateScore();
@@ -571,7 +573,20 @@ function selectPlayer(color){
     selectedPlayerDiv.innerHTML = color;
 }
 
-// New Functions
+function freezeMonsters(numTurns) {
+    for (freezeStone of freezeStones.children) {
+        if (player.x == freezeStone.x && player.y == freezeStone.y) {
+            console.log("Activated");
+            freezeStone.destroy();
+            monsterFreezeCount = numTurns;
+            console.log('monsterFreezeCount; ', monsterFreezeCount);
+            for (monster of monsters.children) {
+                monster.tint = 0x55a0ff;
+            }
+            freeze_sfx.play();
+        }
+    }
+}
 
 function explode(x,y){
     explosion.x = x;
@@ -669,18 +684,7 @@ function OnVoiceRecognition(event) {
     }
 
     if ( match = speechInput.match('(activate|freeze)') ) {
-        for (freezeStone of freezeStones.children) {
-            if (player.x == freezeStone.x && player.y == freezeStone.y) {
-                console.log("Activated");
-                freezeStone.destroy();
-                monsterFreezeCount = 1;
-                console.log('monsterFreezeCount; ', monsterFreezeCount);
-                for (monster of monsters.children) {
-                    monster.tint = 0x55a0ff;
-                }
-                freeze_sfx.play();
-            }
-        }
+        freezeMonsters(2);
     }
 
 
