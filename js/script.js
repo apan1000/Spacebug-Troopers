@@ -88,7 +88,7 @@ function create() {
     yes_commander = game.add.audio('yes_commander');
 
     music = game.add.audio('space_music');
-    music.volume = .2;
+    music.volume = .15;
     music.loop = true;
     music.play();
 
@@ -103,14 +103,18 @@ function create() {
     createSoldiers();
     createExplosion();
 
-    //  The select text
+    // Text
+    winText = game.add.text(game.world.width/2, game.world.height/2, 'YOU WON!', { font: '60px "Press Start 2P"', fill: "#ff0"});
+    winText.anchor.set(0.5);
+    winText.visible = false;
+
     game.add.text(10, 5, 'Selected:', { font: '20px "Press Start 2P"', fill: '#000' });
     selectedPlayerText = game.add.text(200, 5, 'red', { font: '20px "Press Start 2P"'});
     // Set default selected player
-    selectPlayer('red')
+    selectPlayer('red');
 
     // The text that counts the amount of moves
-    game.add.text(10, 35, 'Score:', { font: '20px "Press Start 2P"', fill: '#000' });
+    // game.add.text(10, 35, 'Score:', { font: '20px "Press Start 2P"', fill: '#000' });
 
     //scoreText = game.add.text(140, 35, score, { font: '20px "Press Start 2P"', fill: '#FFF'});
     document.getElementById('step-number').innerHTML = score;
@@ -189,7 +193,7 @@ function playerWalk(direction){
             walk(player, direction);
             console.log(player.key, player.x, player.y);
             monsterAction();
-            if(winText == null){
+            if(!winText.visible){
                 updateScore();
             }
 
@@ -237,8 +241,8 @@ function createMonsters() {
 
     //Add monsters to group
     for (var i = 0; i < 3; i++) {
-        var x = 150 + i*200;
-        var y = 150 + i*200;
+        var x = 450 + i*100;
+        var y = 550;
         var monster = monsters.create(x, y, 'monster');
         monster.anchor.setTo(.5, .5);
         monster.scale.setTo(SCALE);
@@ -304,12 +308,15 @@ function stopWalking(character) {
     player.animations.stop();
     character.frame = 0;
 
-    var monster = monsterCollision(player);
-    if( monster != null ) {
-        console.log('monster!',monster);
-        monster.destroy();
-        explode(player.x, player.y);
+    if(character.type == 'soldier') {
+    	var monster = monsterCollision(character);
+	    if( monster != null ) {
+	        console.log('monster!', monster);
+	        monster.destroy();
+	        explode(character.x, character.y);
+	    }
     }
+    
     animationRunning = false;
     winCheck();
     // console.log(character.key+' is idle');
@@ -340,7 +347,7 @@ function monsterCollision(character) {
 function monsterIsAt(x, y) {
     for (var monster of monsters.children) {
         if(monster.newX == x && monster.newY == y) {
-            console.log(monster.name, 'monsterIsAt', x, y);
+            // console.log(monster.name, 'monsterIsAt', x, y);
             return true;
         }
     }
@@ -391,7 +398,7 @@ function monsterAction() {
 
             newX = monster.x + moves[i][0];
             newY = monster.y + moves[i][1];
-            console.log(monster.name, i);
+            // console.log(monster.name, i);
             if( notOutside(newX, newY) && !monsterIsAt(newX, newY) ) {
 
                 var distance = calcDist(x, y, newX, newY);
@@ -403,7 +410,7 @@ function monsterAction() {
             }
 
         }
-        console.log('monster move direction:',moves[index][2]);
+        // console.log('monster move direction:',moves[index][2]);
         walk(monster, moves[index][2]);
     }
 
@@ -430,7 +437,7 @@ function explode(x,y){
     boom_sfx.play();
 }
 
-function updateScore(){
+function updateScore() {
     score++;
     //scoreText.text = score;
     console.log("updateScore",score);
@@ -445,11 +452,11 @@ function createHealthBars() {
     APText = game.add.text(10, game.world.height-(healthBarHeight*2), 'AP: ' + AP, { font: '20px "Press Start 2P"',           fill: '#000' });
 }
 
-function reset(){
+function reset() {
     monsters.destroy();
     soldiers.destroy();
-    if(winText != null) {
-        winText.destroy();
+    if(winText.visible) {
+        winText.visible = false;
     }
 
     animationRunning = false;
@@ -503,10 +510,9 @@ function walkToward(character, targetColor) {
     }
 }
 
-function winCheck(){
-    if(monsters.children.length == 0) {
-        winText = game.add.text(game.world.width/2, game.world.height/2, 'YOU WON!', { font: '60px "Press Start 2P"', fill: "#ff0"});
-        winText.anchor.set(0.5);
+function winCheck() {
+    if(monsters.children.length == 0 && !winText.visible) {
+        winText.visible = true;
     }
 }
 
