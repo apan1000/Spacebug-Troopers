@@ -168,8 +168,9 @@ function create() {
     winText.anchor.set(0.5);
     winText.visible = false;
 
-    // game.add.text(10, 5, 'Selected:', { font: '20px "Press Start 2P"', fill: '#000' });
-    // selectedPlayerText = game.add.text(200, 5, 'red', { font: '20px "Press Start 2P"'});
+    // Camera shake plugin
+    game.plugins.cameraShake = game.plugins.add(Phaser.Plugin.CameraShake);
+
     // Set default selected player
     selectPlayer('red');
 
@@ -343,7 +344,6 @@ function stopWalking(character) {
     if(character.type == 'soldier') {
     	var monster = monsterCollision(character);
 	    if( monster != null ) {
-	        console.log('monster!', monster);
 	        monster.destroy();
 	        explode(character.x, character.y);
 	    }
@@ -373,6 +373,7 @@ function playerWalk(direction){
     var newX = player.x + x;
     var newY = player.y + y;
 
+    var shake = false;
     //Create a transition to the new location
     if( notOutside(newX, newY) ) {
         if( !soldierCollision(newX, newY) ) {
@@ -397,10 +398,21 @@ function playerWalk(direction){
             }
 
         } else {
+            shake = true;
             bonk_sfx.play();
         }
     } else {
+        shake = true;
         bonk_sfx.play();
+    }
+
+    if(shake === true) {
+        switch(direction){
+            case 'up': game.plugins.cameraShake.shake(5, 0, -1, .1); break;
+            case 'down': game.plugins.cameraShake.shake(5, 0, 1, .1); break;
+            case 'left': game.plugins.cameraShake.shake(5, -1, 0, .1); break;
+            case 'right': game.plugins.cameraShake.shake(5, 1, 0, .1); break;
+        }
     }
 }
 
@@ -558,6 +570,7 @@ function explode(x,y){
     explosion.visible = true;
     explosion.play('boom');
     boom_sfx.play();
+    game.plugins.cameraShake.shake(20, -1, 1, .6);
 }
 
 function updateScore() {
