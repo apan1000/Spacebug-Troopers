@@ -27,6 +27,8 @@ var monsters = [];
 var platforms;
 var cursors;
 var animationRunning = false;
+var freezeStone;
+var monsterFreezeCount = 0;
 
 var steps = 0;
 // var selectedPlayerText;
@@ -123,6 +125,7 @@ function preload() {
 
     // New preloads
     game.load.image('healthBar', 'assets/health.png');
+    game.load.image('freezeStone', 'assets/diamond.png');
     game.load.spritesheet('explosion', 'assets/explosion.png', 32,32);
     game.load.audio('boom_sfx', 'assets/SFX/Explosion.wav');
     game.load.audio('bonk_sfx', 'assets/SFX/Bonk.wav');
@@ -157,6 +160,7 @@ function create() {
     //Create sprites and animations
     createMonsters();
     createSoldiers();
+    createFreezeStone();
     createExplosion();
 
     // Text
@@ -274,6 +278,18 @@ function createMonsters() {
     monsters.callAll('play', null, 'walk_down');
 }
 
+function createFreezeStone() {
+    //Create freeze stone
+    freezeStones = game.add.group();
+    freezeStones.enableBody = true;
+
+    var x = 50 + (Math.round(Math.random()*3) + 1)*100;
+    var y = 450 + (Math.round(Math.random()*3) + 1)*-100;
+    console.log(x,y);
+    var freezeStone = freezeStones.create(x, y, 'freezeStone');
+        freezeStone.anchor.setTo(.5, .5);
+}
+
 function createExplosion() {
     explosion = game.add.sprite(0, 0, 'explosion');
     explosion.visible = false;
@@ -366,7 +382,16 @@ function playerWalk(direction){
 
             walk(player, direction);
             console.log(player.key, player.x, player.y);
-            monsterAction();
+            if (monsterFreezeCount == 0 || monsterFreezeCount > 2) {
+                monsterAction();
+                var i = 0;
+                for (monster of monsters.children) {
+                    monster.tint = monsterColors[i];
+                    i++
+                }
+            } else if (monsterFreezeCount > 0 && monsterFreezeCount <= 2) {
+                monsterFreezeCount++
+            }
             if(!winText.visible){
                 updateScore();
             }
@@ -552,6 +577,7 @@ function createHealthBars() {
 function reset() {
     monsters.destroy();
     soldiers.destroy();
+    freezeStones.destroy();
     if(winText.visible) {
         winText.visible = false;
     }
@@ -563,6 +589,7 @@ function reset() {
 
     createMonsters();
     createSoldiers();
+    createFreezeStone();
 
     selectPlayer('red');
     resetVoiceRecognition();
@@ -616,6 +643,20 @@ function OnVoiceRecognition(event) {
         walkToward(player, match[0]);
         if(steps%4 === 0) {
             yes_commander.play();
+        }
+    }
+
+    if ( match = speechInput.match('(activate|freeze)') ) {
+        for (freezeStone of freezeStones.children) {
+            if (player.x == freezeStone.x && player.y == freezeStone.y) {
+                console.log("Activated");
+                freezeStone.destroy();
+                monsterFreezeCount = 1;
+                console.log('monsterFreezeCount; ', monsterFreezeCount);
+                for (monster of monsters.children) {
+                    monster.tint = 0xe5ffff;
+                }
+            }
         }
     }
 
