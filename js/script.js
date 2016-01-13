@@ -39,6 +39,7 @@ var qKey;
 var explosion;
 var boom_sfx;
 var bonk_sfx;
+var freeze_sfx;
 var yes_commander;
 var music;
 
@@ -131,6 +132,7 @@ function preload() {
     game.load.audio('bonk_sfx', 'assets/SFX/Bonk.wav');
     game.load.audio('space_music', ['assets/SFX/Space.mp3', 'assets/SFX/Space.ogg']);
     game.load.audio('yes_commander', ['assets/SFX/yes_commander.mp3', 'assets/SFX/yes_commander.ogg']);
+    game.load.audio('freeze_sfx', 'assets/SFX/freeze.wav');
 }
 
 
@@ -143,6 +145,10 @@ function create() {
 
     bonk_sfx = game.add.audio('bonk_sfx');
     bonk_sfx.allowMultiple = true;
+
+    freeze_sfx = game.add.audio('freeze_sfx');
+    freeze_sfx.allowMultiple = true;
+    freeze_sfx.volume = .35;
 
     yes_commander = game.add.audio('yes_commander');
 
@@ -233,11 +239,12 @@ function createSoldiers() {
     soldiers = game.add.group();
     soldiers.enableBody = true;
 
-    //Add soldiers to group. Set anchor to middle so that character can be flipped without movement.
+    var positions = [[150,650], [350,650], [550,650]];
 
+    //Add soldiers to group. Set anchor to middle so that character can be flipped without movement.
     for (var i = 0; i < colors.length; i++) {
-        var x = 250 + i*100;
-        var y = 650;
+        var x = positions[i][0]; //250 + i*100;
+        var y = positions[i][1]; //650;
         var soldier = soldiers.create(x, y, colors[i]+'soldier');
         soldier.anchor.setTo(.5, .5);
         soldier.scale.setTo(SCALE);
@@ -260,10 +267,12 @@ function createMonsters() {
     monsters = game.add.group();
     monsters.enableBody = true;
 
+    var positions = [[50,150], [150,450], [550,350]];
+
     //Add monsters to group
     for (var i = 0; i < 3; i++) {
-        var x = 450 + i*100;
-        var y = 550;
+        var x = positions[i][0]; //450 + i*100;
+        var y = positions[i][1]; //550;
         var monster = monsters.create(x, y, 'monster');
         monster.anchor.setTo(.5, .5);
         monster.scale.setTo(SCALE);
@@ -284,8 +293,8 @@ function createFreezeStone() {
     freezeStones = game.add.group();
     freezeStones.enableBody = true;
 
-    var x = 50 + (Math.round(Math.random()*3) + 1)*100;
-    var y = 450 + (Math.round(Math.random()*3) + 1)*-100;
+    var x = 350; //+ (Math.round(Math.random()*3) + 1)*100;
+    var y = 150; + (Math.round(Math.random()*3) + 1)*-100;
     console.log(x,y);
     var freezeStone = freezeStones.create(x, y, 'freezeStone');
         freezeStone.anchor.setTo(.5, .5);
@@ -669,6 +678,7 @@ function OnVoiceRecognition(event) {
                 for (monster of monsters.children) {
                     monster.tint = 0x55a0ff;
                 }
+                freeze_sfx.play();
             }
         }
     }
