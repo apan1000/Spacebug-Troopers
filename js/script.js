@@ -28,7 +28,7 @@ var platforms;
 var cursors;
 var animationRunning = false;
 
-var score = 0;
+var steps = 0;
 // var selectedPlayerText;
 var winText;
 
@@ -45,6 +45,56 @@ var SCALE = 3;
 var colors = ['red', 'green', 'blue'];
 var monsterColors = [0x404040, 0xf0f000, 0xf050a0]; // Used for tinting
 var monsterNames = ['black', 'yellow', 'orange'];
+
+// High score
+var highScore = [100, 101, 102];
+
+window.onload = function() {
+    if(localStorage.hs) {
+        loadHighScore();
+    } else {
+        localStorage.hs = JSON.stringify(highScore);
+        loadHighScore();
+    }
+}
+
+function loadHighScore() {
+    highScore = JSON.parse(localStorage.hs);
+    console.log('highScore:', highScore);
+
+    var highScoreList = document.getElementById('high-score');
+    for(var score of highScore) {
+        var newLi = document.createElement('li');
+        newLi.innerHTML = score;
+        highScoreList.appendChild(newLi);
+    }
+}
+
+function saveHighScore() {
+    if(localStorage.hs) {
+        for(var i = 0; i < highScore.length; i++) {
+            if(steps < highScore[i]) {
+                highScore.splice(i, 0, steps);
+                console.log('highScore changed',highScore);
+                highScore.pop();
+                localStorage.hs = JSON.stringify(highScore);
+                break;
+            }
+            console.log(steps,'<',highScore[i]);
+        }
+    } else {
+        console.log('highScore not saved');
+        // Do nothing
+    }
+
+    var highScoreList = document.getElementById('high-score');
+    highScoreList.innerHTML = ''
+    for(var score of highScore) {
+        var newLi = document.createElement('li');
+        newLi.innerHTML = score;
+        highScoreList.appendChild(newLi);
+    }
+}
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -119,11 +169,8 @@ function create() {
     // Set default selected player
     selectPlayer('red');
 
-    // The text that counts the amount of moves
-    // game.add.text(10, 35, 'Score:', { font: '20px "Press Start 2P"', fill: '#000' });
-
-    //scoreText = game.add.text(140, 35, score, { font: '20px "Press Start 2P"', fill: '#FFF'});
-    document.getElementById('step-number').innerHTML = score;
+    // Element with amount of moves
+    document.getElementById('step-number').innerHTML = steps;
 
     // Start speech recognition
     recognition.start();
@@ -489,10 +536,9 @@ function explode(x,y){
 }
 
 function updateScore() {
-    score++;
-    //scoreText.text = score;
-    console.log("updateScore",score);
-    document.getElementById('step-number').innerHTML = score;
+    steps++;
+    console.log("updateScore",steps);
+    document.getElementById('step-number').innerHTML = steps;
 }
 
 function createHealthBars() {
@@ -512,9 +558,8 @@ function reset() {
 
     animationRunning = false;
 
-    score = 0;
-    document.getElementById('step-number').innerHTML = score;
-    //scoreText.text = score;
+    steps = 0;
+    document.getElementById('step-number').innerHTML = steps;
 
     createMonsters();
     createSoldiers();
@@ -526,6 +571,7 @@ function reset() {
 function winCheck() {
     if(monsters.children.length == 0 && !winText.visible) {
         winText.visible = true;
+        saveHighScore();
     }
 }
 
@@ -563,12 +609,12 @@ function OnVoiceRecognition(event) {
     // MOVEMENT COMMANDS
     if ( match = speechInput.match('(up|left|right|down)') ) {
         playerWalk(match[0]);
-        if(score%4 === 0) {
+        if(steps%4 === 0) {
             yes_commander.play();
         }
     } else if ( match = speechInput.match('(black|yellow|orange)') ) {
         walkToward(player, match[0]);
-        if(score%4 === 0) {
+        if(steps%4 === 0) {
             yes_commander.play();
         }
     }

@@ -29,9 +29,16 @@ canvas {
 
 a {
   color: #1e6bb8;
-  text-decoration: none; }
-  a:hover {
-    text-decoration: underline; }
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+ol {
+  -webkit-padding-start: 0;
+  list-style-position: inside;
+}
 
 #stars {
   width: 1px;
@@ -98,10 +105,50 @@ a {
   padding: 6px;
 }
 
+#scoreBox {
+  height: 100px;
+  width: 300px;
+  margin-top: 25px;
+  left: 50%;
+  margin-left: 380px;
+  position: absolute;
+  background: #400;
+  opacity: 0.7;
+  z-index: 9000;
+  font-family: "Press Start 2P";
+  color: #1aff1a;
+  border: 3px solid #ccc;
+  padding: 6px;
+}
+
+#step-number {
+  margin-top: 10px;
+  margin-right: auto;
+  margin-left: auto;
+  font-size: 18pt;
+  display: block;
+  color: white;
+}
+
+#highScoreBox {
+  width: 300px;
+  margin-top: 150px;
+  left: 50%;
+  margin-left: 380px;
+  position: absolute;
+  background: #400;
+  opacity: 0.7;
+  z-index: 9000;
+  font-family: "Press Start 2P";
+  color: #1aff1a;
+  border: 3px solid #ccc;
+  padding: 6px;
+}
+
 #statusBox {
   height: 300px;
   width: 300px;
-  margin-top: 150px;
+  margin-top: 320px;
   left: 50%;
   margin-left: 380px;
   position: absolute;
@@ -141,31 +188,6 @@ a {
   height: 150px;
   background-position: -295px 30px;
   color: #3b69ec;
-}
-
-#scoreBox {
-  height: 100px;
-  width: 300px;
-  margin-top: 25px;
-  left: 50%;
-  margin-left: 380px;
-  position: absolute;
-  background: #400;
-  opacity: 0.7;
-  z-index: 9000;
-  font-family: "Press Start 2P";
-  color: #1aff1a;
-  border: 3px solid #ccc;
-  padding: 6px;
-}
-
-#step-number {
-  margin-top: 10px;
-  margin-right: auto;
-  margin-left: auto;
-  font-size: 18pt;
-  display: block;
-  color: white;
 }
 
 @keyframes animStar {
