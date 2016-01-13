@@ -83,7 +83,7 @@ a {
 }
 
 #infoBox {
-  height: 450px;
+  /*height: 450px;*/
   width: 300px;
   margin-top: 25px;
   right: 50%;
@@ -115,11 +115,32 @@ a {
 }
 
 #selected-player {
-  height: 150px;
+  font-size: 25px;
+  height: 180px;
   width: 150px;
   margin-top: 30px;
   margin-right: auto;
   margin-left: auto;
+  background-image: url('../assets/rgb.png');
+  background-repeat: no-repeat;
+}
+
+.selected-red {
+  height: 150px;
+  background-position: -15px 30px;
+  color: #c64949;
+}
+
+.selected-green {
+  height: 150px;
+  background-position: -155px 30px;
+  color: #1bb154;
+}
+
+.selected-blue {
+  height: 150px;
+  background-position: -295px 30px;
+  color: #3b69ec;
 }
 
 #scoreBox {
