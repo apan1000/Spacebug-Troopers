@@ -46,14 +46,14 @@ var fanfare_sfx;
 
 var SCALE = 3;
 
-var colors = ['red', 'green', 'blue'];
+var soldierNames = ['red', 'green', 'blue'];
+var monsterNames = ['black', 'yellow', 'orange'];
 var monsterColors = [0x404040, 0xf0f000, 0xf050a0];  // Used for tinting
 var monsterColors2 = {
     black: 0x404040,
     yellow: 0xf0f000,
     orange: 0xf050a0
 }; // Used for tinting back from freeze
-var monsterNames = ['black', 'yellow', 'orange'];
 
 // High score
 var highScore = [100, 101, 102];
@@ -119,10 +119,10 @@ function preload() {
     game.load.image('chessmap', 'assets/chessmap.png');
 
     // Create soldiers
-    for(var color of colors) {
+    for(var color of soldierNames) {
     	game.load.spritesheet(
     		color+'soldier', //Name
-    		'assets/'+color+'soldier_spritesheet_ORG.png', // Image file
+    		'assets/soldier_'+color+'.png', // Image file
     		28, 28 // The size of each frame
     	);
     }
@@ -201,7 +201,7 @@ function create() {
 
     //  Create our controls.
     configureKeys();
-    
+
     // Start speech recognition
     recognition.start();
 }
@@ -262,10 +262,10 @@ function createSoldiers() {
     var positions = [[150,650], [350,650], [550,650]];
 
     //Add soldiers to group. Set anchor to middle so that character can be flipped without movement.
-    for (var i = 0; i < colors.length; i++) {
+    for (var i = 0; i < soldierNames.length; i++) {
         var x = positions[i][0]; //250 + i*100;
         var y = positions[i][1]; //650;
-        var soldier = soldiers.create(x, y, colors[i]+'soldier');
+        var soldier = soldiers.create(x, y, soldierNames[i]+'soldier');
         soldier.anchor.setTo(.5, .5);
         soldier.scale.setTo(SCALE);
         soldier.type = 'soldier';
@@ -381,7 +381,7 @@ function stopWalking(character) {
 	        explode(character.x, character.y);
 	    }
     }
-    
+
     animationRunning = false;
     winCheck();
     // console.log(character.key+' is idle');
@@ -439,7 +439,7 @@ function playerWalk(direction){
         bonk_sfx.play();
     }
 
-    if(shake === true) {
+    if(shake) {
         switch(direction){
             case 'up': game.plugins.cameraShake.shake(5, 0, -1, .1); break;
             case 'down': game.plugins.cameraShake.shake(5, 0, 1, .1); break;
