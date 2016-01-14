@@ -55,6 +55,13 @@ var monsterColors2 = {
     orange: 0xf050a0
 }; // Used for tinting back from freeze
 
+var step = {
+	left: {x:-100, y:0},
+	right: {x:100, y:0},
+	up: {x:0, y:-100},
+	down:{x:0, y:100}
+}
+
 // High score
 var highScore = [100, 101, 102];
 
@@ -277,6 +284,7 @@ function createSoldiers() {
     soldiers.callAll('animations.add', 'animations', 'walk_down', row(0, 4), 10, true);
     soldiers.callAll('animations.add', 'animations', 'walk_up', row(1, 4), 10, true);
     soldiers.callAll('animations.add', 'animations', 'walk_left', row(2, 4), 10, true);
+    soldiers.callAll('animations.add', 'animations', 'walk_right', row(2, 4), 10, true);
     animationRunning = false;
 }
 
@@ -334,25 +342,15 @@ function createExplosion() {
 }
 
 function walk(character, direction) {
-    var x = 0;
-    var y = 0;
-    // var directionText = direction;
-
-    switch(direction) {
-        case 'up': y = -100; break;
-        case 'down': y = 100; break;
-        case 'left':x = -100; break;
-        case 'right': x = 100;
-        direction = 'left'; // Since mirrored, play left animation.
-        break;
-    }
+    var x = step[direction].x;
+    var y = step[direction].y;
 
     //Calculate new position
     var newX = character.x + x;
     var newY = character.y + y;
 
     //Create a transition to the new location
-    if( notOutside(newX, newY) ) {
+    if(notOutside(newX, newY) ) {
         if( !soldierCollision(newX, newY) ) {
             character.newX = newX;
             character.newY = newY;
@@ -390,21 +388,9 @@ function stopWalking(character) {
 // Special function for getting the player to walk
 function playerWalk(direction){
     if(animationRunning) return; // Do nothing if an animation is still going
-
-    var x = 0;
-    var y = 0;
-
-    // Check if colliding with wall or other player character
-    switch(direction){
-        case 'up': y = -100; break;
-        case 'down': y = 100; break;
-        case 'left':x = -100; break;
-        case 'right': x = 100; break;
-    }
-
     //Calculate new position
-    var newX = player.x + x;
-    var newY = player.y + y;
+    var newX = player.x + step[direction].x;
+    var newY = player.y + step[direction].y;
 
     var shake = false;
     //Create a transition to the new location
