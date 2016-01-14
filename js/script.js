@@ -6,6 +6,7 @@
 // WEBSPEECH API VARIABLES
 var SpeechRecognition = SpeechRecognition || webkitSpeechRecognition;
 var recognition = new SpeechRecognition();
+var lastResultIndex = -1;
 
 //webspeech setup
 recognition.continuous = true;
@@ -747,49 +748,73 @@ function winCheck() {
 // Gets called when something is said in the microphone.
 function OnVoiceRecognition(event) {
 
-    var speechInput = '';
-    var final_transcript = '';
+    // Check that we have not acted on this input before
+    if(event.resultIndex != lastResultIndex) {
 
-    // Put all results into a single string
-    for (var i = event.resultIndex; i < event.results.length; ++i) {
-        if (event.results[i].isFinal) {
-            final_transcript += event.results[i][0].transcript;
+        // var speechInput = '';
+        // var final_transcript = '';
+
+        // Put all results into a single string
+        // for (var i = event.resultIndex; i < event.results.length; ++i) {
+        //     if (event.results[i].isFinal) {
+        //         final_transcript += event.results[i][0].transcript;
+        //     } else {
+        //         speechInput = event.results[i][0].transcript.toLowerCase();
+        //     }
+        // }
+
+        var speechInput = event.results[event.results.length-1][0].transcript.toLowerCase();
+        console.log(speechInput);
+
+        document.getElementById('command-text').innerHTML = speechInput;
+
+        var match = '';
+        if(animationRunning) return; // Do nothing if an animation is still going
+
+
+        // SELECTION COMMANDS
+        if ( match  = speechInput.match('(red|green|blue)') ) {
+            selectPlayer(match[0]);
+        }
+
+        // MOVEMENT COMMANDS
+        if ( match = speechInput.match('(up|left|right|down|app|north|south|east|west)') ) {
+            if( dirMatch = directionMap[match[0]] ) {
+                playerWalk(dirMatch);
+            } else {
+                playerWalk(match[0]);
+            }
+            if(steps%4 === 0) {
+                yes_commander.play();
+            }
+
+            lastResultIndex = event.resultIndex;
+            console.log(lastResultIndex);
+        } else if ( match = speechInput.match('(black|yellow|orange)') ) {
+            walkToward(player, match[0]);
+            if(steps%4 === 0) {
+                yes_commander.play();
+            }
+
+            lastResultIndex = event.resultIndex;
+            console.log(lastResultIndex);
+        } else if ( match = speechInput.match('(activate|freeze)') ) {
+            freezeMonsters(2);
+
+            lastResultIndex = event.resultIndex;
+            console.log(lastResultIndex);
+        }
+
+    } else {
+        // If input is final display that we are waiting for next command
+        if(event.results[event.results.length-1].isFinal) {
+            document.getElementById('command-text').innerHTML = 'Awaiting command...';
+            document.getElementById('command-text').className = '';
+        // Else tell the user to wait
         } else {
-            speechInput = event.results[i][0].transcript.toLowerCase();
+            document.getElementById('command-text').innerHTML = 'Wait a moment...';
+            document.getElementById('command-text').className = 'error';
         }
-    }
-    console.log(speechInput);
-
-    document.getElementById('command-text').innerHTML = speechInput;
-
-    var match = '';
-    if(animationRunning) return; // Do nothing if an animation is still going
-
-
-    // SELECTION COMMANDS
-    if ( match  = speechInput.match('(red|green|blue)') ) {
-        selectPlayer(match[0]);
-    }
-
-    // MOVEMENT COMMANDS
-    if ( match = speechInput.match('(up|left|right|down|app|north|south|east|west)') ) {
-        if( dirMatch = directionMap[match[0]] ) {
-            playerWalk(dirMatch);
-        } else {
-            playerWalk(match[0]);
-        }
-        if(steps%4 === 0) {
-            yes_commander.play();
-        }
-    } else if ( match = speechInput.match('(black|yellow|orange)') ) {
-        walkToward(player, match[0]);
-        if(steps%4 === 0) {
-            yes_commander.play();
-        }
-    }
-
-    if ( match = speechInput.match('(activate|freeze)') ) {
-        freezeMonsters(2);
     }
 
 
