@@ -129,7 +129,7 @@ function preload() {
 
     // New preloads
     game.load.image('healthBar', 'assets/health.png');
-    game.load.image('freezeStone', 'assets/diamond.png');
+    game.load.spritesheet('freezeStone', 'assets/freezeball_spritesheet.png', 28, 28);
     game.load.spritesheet('explosion', 'assets/explosion.png', 32,32);
     game.load.audio('boom_sfx', 'assets/SFX/Explosion.wav');
     game.load.audio('bonk_sfx', 'assets/SFX/Bonk.wav');
@@ -302,6 +302,10 @@ function createFreezeStone() {
     console.log(x,y);
     var freezeStone = freezeStones.create(x, y, 'freezeStone');
     freezeStone.anchor.setTo(.5, .5);
+    freezeStone.scale.setTo(SCALE);
+
+    freezeStones.callAll('animations.add', 'animations', 'burn', row(0, 5), 10, true);
+    freezeStones.callAll('play', null, 'burn');
 }
 
 function createExplosion() {
