@@ -62,6 +62,14 @@ var step = {
 	down:{x:0, y:100}
 }
 
+var directionMap = {
+	north: 'up',
+	app: 'up',
+	south: 'down',
+	east: 'right',
+	west: 'left'
+};
+
 // High score
 var highScore = [100, 101, 102];
 
@@ -591,7 +599,6 @@ function freezeMonsters(numTurns) {
             console.log("Activated");
             freezeStone.destroy();
             monsterFreezeCount = numTurns;
-            console.log('monsterFreezeCount; ', monsterFreezeCount);
             for (monster of monsters.children) {
                 monster.tint = 0x55a0ff;
             }
@@ -670,7 +677,7 @@ function OnVoiceRecognition(event) {
         if (event.results[i].isFinal) {
             final_transcript += event.results[i][0].transcript;
         } else {
-            speechInput = event.results[i][0].transcript.toLowerCase();
+            speechInput += event.results[i][0].transcript.toLowerCase();
         }
     }
     console.log(speechInput);
@@ -687,8 +694,12 @@ function OnVoiceRecognition(event) {
     }
 
     // MOVEMENT COMMANDS
-    if ( match = speechInput.match('(up|left|right|down)') ) {
-        playerWalk(match[0]);
+    if ( match = speechInput.match('(up|left|right|down|app|north|south|east|west)') ) {
+    	if( dirMatch = directionMap[match[0]] ) {
+    		playerWalk(dirMatch);
+    	} else {
+    		playerWalk(match[0]);
+    	}
         if(steps%4 === 0) {
             yes_commander.play();
         }
