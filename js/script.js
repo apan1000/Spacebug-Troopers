@@ -663,6 +663,7 @@ function reset() {
 function winCheck() {
     if(monsters.children.length == 0 && !winText.visible) {
         winText.visible = true;
+        winText.bringToTop();
         fanfare_sfx.play();
         saveHighScore();
     }
