@@ -16,6 +16,7 @@ recognition.onresult = OnVoiceRecognition;
 recognition.onend = function() {console.log("Starting recognition again!"); recognition.start();}
 
 function resetVoiceRecognition() {
+    document.getElementById('command-text').className = '';
     recognition.stop();
     recognition.start();
 }
@@ -720,6 +721,7 @@ function reset() {
 
     animationRunning = false;
 
+    lastResultIndex = -1;
     monsterFreezeCount = 0;
     steps = 0;
     document.getElementById('step-number').innerHTML = steps;
@@ -803,6 +805,11 @@ function OnVoiceRecognition(event) {
 
             lastResultIndex = event.resultIndex;
             console.log(lastResultIndex);
+        }
+
+        // RESTART COMMANDS
+        if ( match  = speechInput.match('(restart|reset)') ) {
+            reset();
         }
 
     } else {
