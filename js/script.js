@@ -15,7 +15,7 @@ recognition.onresult = OnVoiceRecognition;
 recognition.onend = function() {console.log("Starting recognition again!"); recognition.start();}
 
 function resetVoiceRecognition() {
-	recognition.stop();
+    recognition.stop();
     recognition.start();
 }
 
@@ -34,6 +34,10 @@ var steps = 0;
 // var selectedPlayerText;
 var winText;
 
+var thunder_sfx;
+var electric;
+var gas_sfx;
+var gas;
 var explosion;
 var boom_sfx;
 var bonk_sfx;
@@ -56,18 +60,18 @@ var monsterColors2 = {
 }; // Used for tinting back from freeze
 
 var step = {
-	left: {x:-100, y:0},
-	right: {x:100, y:0},
-	up: {x:0, y:-100},
-	down:{x:0, y:100}
+    left: {x:-100, y:0},
+    right: {x:100, y:0},
+    up: {x:0, y:-100},
+    down:{x:0, y:100}
 }
 
 var directionMap = {
-	north: 'up',
-	app: 'up',
-	south: 'down',
-	east: 'right',
-	west: 'left'
+    north: 'up',
+    app: 'up',
+    south: 'down',
+    east: 'right',
+    west: 'left'
 };
 
 // High score
@@ -135,16 +139,20 @@ function preload() {
 
     // Create soldiers
     for(var color of soldierNames) {
-    	game.load.spritesheet(
-    		color+'soldier', //Name
-    		'assets/soldier_'+color+'.png', // Image file
-    		28, 28 // The size of each frame
-    	);
+        game.load.spritesheet(
+            color+'soldier', //Name
+            'assets/soldier_'+color+'.png', // Image file
+            28, 28 // The size of each frame
+        );
     }
 
     game.load.spritesheet('monster', 'assets/monster_ORG.png', 28, 28);
 
     // New preloads
+    game.load.spritesheet('electric', 'assets/electric.png', 32,32);
+    game.load.spritesheet('gas', 'assets/gas.png', 64,64);
+    game.load.audio('gas_sfx', 'assets/SFX/gas.ogg');
+    game.load.audio('thunder_sfx', 'assets/SFX/thunder.ogg');
     game.load.image('healthBar', 'assets/health.png');
     game.load.spritesheet('freezeStone', 'assets/freezeball_spritesheet.png', 28, 28);
     game.load.spritesheet('explosion', 'assets/explosion.png', 32,32);
@@ -162,6 +170,14 @@ function preload() {
 function create() {
 
     // New create stuff
+    thunder_sfx = game.add.audio('thunder_sfx');
+    thunder_sfx.allowMultiple = true;
+    thunder_sfx.volume = .35;
+    
+    gas_sfx = game.add.audio('gas_sfx');
+    gas_sfx.allowMultiple = true;
+    gas_sfx.volume = .35;
+    
     boom_sfx = game.add.audio('boom_sfx');
     boom_sfx.allowMultiple = true;
     boom_sfx.volume = .35;
@@ -199,6 +215,8 @@ function create() {
     createSoldiers();
     createFreezeStone();
     createExplosion();
+    createElectricity();
+    createGas();
 
     // Text
     winText = game.add.text(game.world.width/2, game.world.height/2, 'YOU WON!', { font: '60px "Press Start 2P"', fill: "#ff0"});
@@ -349,6 +367,29 @@ function createExplosion() {
     explosion.events.onAnimationComplete.add(function(){explosion.visible = false;},this);
 }
 
+
+function createElectricity() {
+    electric = game.add.sprite(0, 0, 'electric');
+    electric.visible = false;
+    electric.anchor.setTo(.5, .5);
+    electric.scale.setTo(SCALE);
+    electric.animations.add('electricity');
+    electric.animations.getAnimation('electricity').delay = 100;
+    electric.events.onAnimationComplete.add(function(){electric.visible = false;},this);
+}
+
+function createGas() {
+    gas = game.add.sprite(0, 0, 'gas');
+    gas.visible = false;
+    gas.anchor.setTo(.5, .5);
+    gas.scale.setTo(SCALE*0.45);
+    gas.animations.add('gascloud');
+    gas.animations.getAnimation('gascloud').delay = 100;
+    gas.events.onAnimationComplete.add(function(){gas.visible = false;},this);
+}
+
+
+
 function walk(character, direction) {
     var x = step[direction].x;
     var y = step[direction].y;
@@ -381,11 +422,27 @@ function stopWalking(character) {
     character.frame = 0;
 
     if(character.type == 'soldier') {
-    	var monster = monsterCollision(character);
-	    if( monster != null ) {
-	        monster.destroy();
-	        explode(character.x, character.y);
-	    }
+        var monster = monsterCollision(character);
+        if( monster != null ) {
+            monster.destroy();
+             
+            var currentPlayer = character.key;
+            switch (currentPlayer){
+            
+            case 'bluesoldier':
+            electricity(character.x,character.y);
+            break;
+            
+            case 'redsoldier':
+            explode(character.x, character.y);
+            break;          
+            
+            
+            case 'greensoldier':
+            gasCloud(character.x, character.y);
+            break;          
+            }
+        }
     }
 
     animationRunning = false;
@@ -617,6 +674,27 @@ function explode(x,y){
     game.plugins.cameraShake.shake(20, -1, 1, .6);
 }
 
+function electricity(x,y){
+    electric.x = x;
+    electric.y = y;
+    electric.visible = true;
+    electric.play('electricity');
+    thunder_sfx.play();
+    //game.plugins.cameraShake.shake(20, -1, 1, .6);
+}
+
+function gasCloud(x,y){
+    gas.x = x;
+    gas.y = y;
+    gas.visible = true;
+    gas.play('gascloud');
+    gas_sfx.play();
+    //game.plugins.cameraShake.shake(20, -1, 1, .6);
+}
+
+
+
+
 function updateScore() {
     steps++;
     console.log("updateScore",steps);
@@ -695,11 +773,11 @@ function OnVoiceRecognition(event) {
 
     // MOVEMENT COMMANDS
     if ( match = speechInput.match('(up|left|right|down|app|north|south|east|west)') ) {
-    	if( dirMatch = directionMap[match[0]] ) {
-    		playerWalk(dirMatch);
-    	} else {
-    		playerWalk(match[0]);
-    	}
+        if( dirMatch = directionMap[match[0]] ) {
+            playerWalk(dirMatch);
+        } else {
+            playerWalk(match[0]);
+        }
         if(steps%4 === 0) {
             yes_commander.play();
         }
