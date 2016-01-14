@@ -755,7 +755,7 @@ function OnVoiceRecognition(event) {
         if (event.results[i].isFinal) {
             final_transcript += event.results[i][0].transcript;
         } else {
-            speechInput += event.results[i][0].transcript.toLowerCase();
+            speechInput = event.results[i][0].transcript.toLowerCase();
         }
     }
     console.log(speechInput);
