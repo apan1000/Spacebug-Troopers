@@ -38,8 +38,11 @@ var explosion;
 var boom_sfx;
 var bonk_sfx;
 var freeze_sfx;
+var monster_move_sfx;
+var soldier_move_sfx;
 var yes_commander;
 var music;
+var fanfare_sfx;
 
 var SCALE = 3;
 
@@ -86,7 +89,6 @@ function saveHighScore() {
                 localStorage.hs = JSON.stringify(highScore);
                 break;
             }
-            console.log(steps,'<',highScore[i]);
         }
     } else {
         console.log('highScore not saved');
@@ -136,6 +138,9 @@ function preload() {
     game.load.audio('space_music', ['assets/SFX/Space.mp3', 'assets/SFX/Space.ogg']);
     game.load.audio('yes_commander', ['assets/SFX/yes_commander.mp3', 'assets/SFX/yes_commander.ogg']);
     game.load.audio('freeze_sfx', 'assets/SFX/freeze.wav');
+    game.load.audio('monster_move_sfx', 'assets/SFX/monster_move.wav');
+    game.load.audio('soldier_move_sfx', 'assets/SFX/soldier_move.wav');
+    game.load.audio('fanfare_sfx', ['assets/SFX/fanfare.mp3', 'assets/SFX/fanfare.ogg']);
 }
 
 
@@ -153,7 +158,18 @@ function create() {
     freeze_sfx.allowMultiple = true;
     freeze_sfx.volume = .35;
 
+    monster_move_sfx = game.add.audio('monster_move_sfx');
+    monster_move_sfx.allowMultiple = true;
+    monster_move_sfx.volume = .1;
+
+    soldier_move_sfx = game.add.audio('soldier_move_sfx');
+    soldier_move_sfx.allowMultiple = true;
+    soldier_move_sfx.volume = .1;
+
     yes_commander = game.add.audio('yes_commander');
+
+    fanfare_sfx = game.add.audio('fanfare_sfx');
+    fanfare_sfx.volume = .5;
 
     music = game.add.audio('space_music');
     music.volume = .15;
@@ -412,6 +428,8 @@ function playerWalk(direction){
                 updateScore();
             }
 
+            soldier_move_sfx.play();
+
         } else {
             shake = true;
             bonk_sfx.play();
@@ -530,6 +548,10 @@ function monsterAction() {
         walk(monster, moves[index][2]);
     }
 
+    if(monsters.children.length > 0) {
+        monster_move_sfx.play();
+    }
+
     // var randomMon = monsters.getRandom();
     // console.log(randomMon);
     // walkToward(randomMon, player);
@@ -641,6 +663,7 @@ function reset() {
 function winCheck() {
     if(monsters.children.length == 0 && !winText.visible) {
         winText.visible = true;
+        fanfare_sfx.play();
         saveHighScore();
     }
 }
