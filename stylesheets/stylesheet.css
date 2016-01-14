@@ -90,6 +90,10 @@ ol {
   font-size: 20pt;
 }
 
+.error {
+  color: #EC231E;
+}
+
 #infoBox {
   /*height: 450px;*/
   width: 300px;
