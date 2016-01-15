@@ -370,8 +370,10 @@ function walk(character, direction) {
 			character.newX = newX;
 			character.newY = newY;
 
-			if(x==100) character.scale.setTo(-SCALE,SCALE); //mirror character
-			character.animations.play('walk_'+direction, 10, true);
+      if(character.type === 'soldier') character.animations.play('walk_'+direction, 10, true);
+
+      if(character.type === 'monster') character.animations.play('walk', 10, true);
+
 			animationRunning = true;
 			// console.log(character.key+' is moving')
 			tween = this.game.add.tween(character).to({x:newX, y:newY}, 800, null, true);
@@ -393,7 +395,9 @@ function stopWalking(character) {
 			monster.destroy();
 			explode(character.x, character.y);
 		}
-	}
+	}else{
+    character.animations.play('idle');
+  }
 
 	animationRunning = false;
 	winCheck();
@@ -411,6 +415,7 @@ function playerWalk(direction){
 	//Create a transition to the new location
 	if( notOutside(newX, newY) ) {
 		if( !soldierCollision(newX, newY) ) {
+			if(step[direction].x ==100) player.scale.setTo(-SCALE,SCALE); //mirror character
 
 			player.newX = newX;
 			player.newY = newY;
