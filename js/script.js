@@ -65,6 +65,10 @@ var step = {
 	right: {x:100, y:0},
 	up: {x:0, y:-100},
 	down:{x:0, y:100}
+	// up_left: {x:-100, y:-100},
+	// up_right: {x:100, y:-100},
+	// down_left: {x:-100, y:100},
+	// down_right:{x:100, y:100}
 }
 
 var directionMap = {
@@ -481,17 +485,17 @@ function walkToward(character, targetColor) {
 
 function monsterAction() {
 	// dx + dy
-	// var calcDist = function(x1, y1, x2, y2) {
-	//     return Math.abs(x2-x1) + Math.abs(y2-y1);
-	// }
+	var calcDist = function(x1, y1, x2, y2) {
+		return Math.abs(x2-x1) + Math.abs(y2-y1);
+	}
 
 	// Linear distance
-	var calcDist = function(x1, y1, x2, y2) {
-		return Math.sqrt(
-			Math.pow((x2-x1),2) +
-			Math.pow((y2-y1),2)
-		);
-	}
+	// var calcDist = function(x1, y1, x2, y2) {
+	// 	return Math.sqrt(
+	// 		Math.pow((x2-x1),2) +
+	// 		Math.pow((y2-y1),2)
+	// 	);
+	// }
 
 	for (var monster of monsters.children) {
 		// Determine the position of the closest soldier
@@ -507,46 +511,66 @@ function monsterAction() {
 				y = soldier.newY;
 			}
 		}
-		// console.log("Closest soldier is at "+ x +"," + y);
 
 		// There is a maximum of 4 directions a monster can move.
 		// Determine which one maximizes distance.
-		var moves = [
-			[100, 0, 'right'],
-			[-100, 0, 'left'],
-			[0, 100, 'down'],
-			[0, -100, 'up']
-		];
-		var index = 0;
 		var maxDistance = 0;
-		for (var i = 0; i < moves.length; i++) {
+		var rightMove = 'up';
+		for (var move in step) {
+			if (step.hasOwnProperty(move)) {
+				newX = monster.x + step[move].x;
+				newY = monster.y + step[move].y;
+				// console.log(monster.name, i);
+				if( notOutside(newX, newY) && !monsterIsAt(newX, newY) ) {
 
-			newX = monster.x + moves[i][0];
-			newY = monster.y + moves[i][1];
-			// console.log(monster.name, i);
-			if( notOutside(newX, newY) && !monsterIsAt(newX, newY) ) {
-
-				var distance = calcDist(x, y, newX, newY);
-				if(distance > maxDistance) {
-					maxDistance = distance;
-					index = i;
+					var distance = calcDist(x, y, newX, newY);
+					if(distance > maxDistance) {
+						maxDistance = distance;
+						rightMove =  move;
+					}
 				}
-
 			}
-
 		}
-		// console.log('monster move direction:',moves[index][2]);
-		walk(monster, moves[index][2]);
+		if(monsters.children.length > 0) {
+			monster_move_sfx.play();
+		}
+		walk(monster, rightMove);
 	}
+}
 
-	if(monsters.children.length > 0) {
-		monster_move_sfx.play();
-	}
+		// var moves = [
+		// 	[100, 0, 'right'],
+		// 	[-100, 0, 'left'],
+		// 	[0, 100, 'down'],
+		// 	[0, -100, 'up']
+		// ];
+		// var index = 0;
+		// for (var i = 0; i < moves.length; i++) {
+		//
+		// 	newX = monster.x + moves[i][0];
+		// 	newY = monster.y + moves[i][1];
+		// 	// console.log(monster.name, i);
+		// 	if( notOutside(newX, newY) && !monsterIsAt(newX, newY) ) {
+		//
+		// 		var distance = calcDist(x, y, newX, newY);
+		// 		if(distance > maxDistance) {
+		// 			maxDistance = distance;
+		// 			index = i;
+		// 		}
+		//
+		// 	}
+		//
+		// }
+		// console.log('monster move direction:',moves[index][2]);
+		// walk(monster, moves[index][2]);
+	// }
+
+
 
 	// var randomMon = monsters.getRandom();
 	// console.log(randomMon);
 	// walkToward(randomMon, player);
-}
+// }
 
 function notOutside(x, y) {
 	return (x < game.world.width && x > 0 && y < game.world.height && y > 0);
