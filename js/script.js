@@ -79,6 +79,11 @@ var directionMap = {
 	west: 'left'
 };
 
+var algorithms = [
+  function(x1, y1, x2, y2) {return Math.abs(x2-x1) + Math.abs(y2-y1);},
+  function(x1, y1, x2, y2) {return Math.pow((x2-x1),2) +Math.pow((y2-y1),2);},
+  function(x1, y1, x2, y2) {return Math.sqrt(Math.pow((x2-x1),2) +Math.pow((y2-y1),2));}
+]
 
 ////////////////////////////////////////////////////////////////////////////////
 // DOM initialization
@@ -322,6 +327,7 @@ function createMonsters() {
 		monster.animations.add('idle', row(0, 4), 5, true);
 		monster.animations.add('walk', row(1, 4), 5, true);
 		monster.play('idle');
+    monster.distanceAlgorithm = algorithms[i];
 	}
 }
 
@@ -484,23 +490,12 @@ function walkToward(character, targetColor) {
 }
 
 function monsterAction() {
-	// dx + dy
-	var calcDist = function(x1, y1, x2, y2) {
-		return Math.abs(x2-x1) + Math.abs(y2-y1);
-	}
-
-	// Linear distance
-	// var calcDist = function(x1, y1, x2, y2) {
-	// 	return Math.sqrt(
-	// 		Math.pow((x2-x1),2) +
-	// 		Math.pow((y2-y1),2)
-	// 	);
-	// }
-
 	for (var monster of monsters.children) {
 		// Determine the position of the closest soldier
 		var x, y;
 		var minDistance = 999;
+
+    var calcDist = monster.distanceAlgorithm;
 
 		for (var soldier of soldiers.children) {
 			var distance = calcDist(monster.x, monster.y, soldier.newX, soldier.newY);
@@ -522,7 +517,6 @@ function monsterAction() {
 				newY = monster.y + step[move].y;
 				// console.log(monster.name, i);
 				if( notOutside(newX, newY) && !monsterIsAt(newX, newY) ) {
-
 					var distance = calcDist(x, y, newX, newY);
 					if(distance > maxDistance) {
 						maxDistance = distance;
