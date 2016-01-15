@@ -45,6 +45,11 @@ var yes_commander;
 var music;
 var fanfare_sfx;
 
+var thunder_sfx;
+var electric;
+var gas_sfx;
+var gas;
+
 var SCALE = 3;
 // High score
 var highScore = [100, 101, 102];
@@ -167,6 +172,10 @@ function preload() {
 	game.load.audio('monster_move_sfx', 'assets/SFX/monster_move.wav');
 	game.load.audio('soldier_move_sfx', 'assets/SFX/soldier_move.wav');
 	game.load.audio('fanfare_sfx', ['assets/SFX/fanfare.mp3', 'assets/SFX/fanfare.ogg']);
+  game.load.spritesheet('electric', 'assets/electric.png', 32,32);
+  game.load.spritesheet('gas', 'assets/gas.png', 64,64);
+  game.load.audio('gas_sfx', 'assets/SFX/gas.ogg');
+  game.load.audio('thunder_sfx', 'assets/SFX/thunder.ogg');
 }
 
 
@@ -176,6 +185,14 @@ function create() {
 	boom_sfx = game.add.audio('boom_sfx');
 	boom_sfx.allowMultiple = true;
 	boom_sfx.volume = .35;
+
+	gas_sfx = game.add.audio('gas_sfx');
+	gas_sfx.allowMultiple = true;
+	gas_sfx.volume = .35;
+
+	thunder_sfx = game.add.audio('thunder_sfx');
+	thunder_sfx.allowMultiple = true;
+	thunder_sfx.volume = .35;
 
 	bonk_sfx = game.add.audio('bonk_sfx');
 	bonk_sfx.allowMultiple = true;
@@ -210,6 +227,8 @@ function create() {
 	createSoldiers();
 	createFreezeStone();
 	createExplosion();
+  createElectricity();
+  createGas();
 
 	// Text
 	winText = game.add.text(game.world.width/2, game.world.height/2, 'YOU WON!', { font: '60px "Press Start 2P"', fill: "#ff0"});
@@ -356,6 +375,26 @@ function createExplosion() {
 	explosion.events.onAnimationComplete.add(function(){explosion.visible = false;},this);
 }
 
+function createElectricity() {
+  electric = game.add.sprite(0, 0, 'electric');
+  electric.visible = false;
+  electric.anchor.setTo(.5, .5);
+  electric.scale.setTo(SCALE);
+  electric.animations.add('electricity');
+  electric.animations.getAnimation('electricity').delay = 100;
+  electric.events.onAnimationComplete.add(function(){electric.visible = false;},this);
+}
+
+function createGas() {
+  gas = game.add.sprite(0, 0, 'gas');
+  gas.visible = false;
+  gas.anchor.setTo(.5, .5);
+  gas.scale.setTo(SCALE*0.45);
+  gas.animations.add('gascloud');
+  gas.animations.getAnimation('gascloud').delay = 100;
+  gas.events.onAnimationComplete.add(function(){gas.visible = false;},this);
+}
+
 function walk(character, direction) {
 	var x = step[direction].x;
 	var y = step[direction].y;
@@ -393,7 +432,19 @@ function stopWalking(character) {
 		var monster = monsterCollision(character);
 		if( monster != null ) {
 			monster.destroy();
-			explode(character.x, character.y);
+      switch (character.key){
+        case 'soldier_blue':
+        electricity(character.x,character.y);
+        break;
+
+        case 'soldier_red':
+        explode(character.x, character.y);
+        break;
+
+        case 'soldier_green':
+        gasCloud(character.x, character.y);
+        break;
+      }
 		}
 	}else{
     character.animations.play('idle');
@@ -633,6 +684,22 @@ function explode(x,y){
 	explosion.play('boom');
 	boom_sfx.play();
 	game.plugins.cameraShake.shake(20, -1, 1, .6);
+}
+
+function electricity(x,y){
+     electric.x = x;
+     electric.y = y;
+     electric.visible = true;
+     electric.play('electricity');
+     thunder_sfx.play();
+}
+
+function gasCloud(x,y){
+     gas.x = x;
+     gas.y = y;
+     gas.visible = true;
+     gas.play('gascloud');
+     gas_sfx.play();
 }
 
 function updateScore() {
