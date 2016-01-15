@@ -51,7 +51,7 @@ var highScore = [100, 101, 102];
 
 
 var soldierNames = ['red', 'green', 'blue'];
-var monsterNames = ['black', 'yellow', 'orange'];
+var monsterNames = ['black', 'purple', 'orange'];
 var monsterColors = [0x404040, 0xf0f000, 0xf050a0];  // Used for tinting
 var monsterColors2 = {
 	black: 0x404040,
@@ -64,7 +64,7 @@ var step = {
 	left: {x:-100, y:0},
 	right: {x:100, y:0},
 	up: {x:0, y:-100},
-	down:{x:0, y:100}
+	down:{x:0, y:100}//,
 	// up_left: {x:-100, y:-100},
 	// up_right: {x:100, y:-100},
 	// down_left: {x:-100, y:100},
